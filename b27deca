@@ -1,0 +1,204 @@
+namespace Decooo
+{
+    public partial class RoditeljiFrm : Form
+    {
+
+        OleDbConnection konek = new OleDbConnection();
+        OleDbDataAdapter adapter = new OleDbDataAdapter();
+        OleDbDataAdapter adapter2 = new OleDbDataAdapter();
+        DataTable tabela2 = new DataTable();
+        DataTable tabela = new DataTable();
+        int id = 0;
+        int prvitext;
+      
+        int id1 = 1, id2 = 2, id3 = 3;
+        public RoditeljiFrm()
+        {
+            InitializeComponent();
+            string putanja = Environment.CurrentDirectory;
+
+string[] putanjaBaze = putanja.Split(new string[] { "bin" }, StringSplitOptions.None);
+
+AppDomain.CurrentDomain.SetData("DataDirectory", putanjaBaze[0]);
+
+konek = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=|DataDirectory|\Dnevni boravak dece.accdb");
+
+            
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void RoditeljiFrm_Load(object sender, EventArgs e)
+        {
+            if(textBox1.Text=="")
+            {
+                button3.Enabled = false;
+                button4.Enabled = false;
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            konek.Open();
+            string query = "SELECT MAX(RoditeljiID) FROM Roditelji";
+               using (OleDbCommand cmd = new OleDbCommand(query, konek))
+                {
+                id = Convert.ToInt32(cmd.ExecuteScalar()) + 1;
+                }
+
+                textBox1.Text = id.ToString();
+
+                textBox2.Text = "";
+
+                textBox3.Text = "";
+
+                textBox4.Text = "";
+
+                maskedTextBox1.Text = "";
+
+                maskedTextBox2.Text = "";
+                button3.Enabled = true;
+                button4.Enabled = true;
+             
+                konek.Close();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            konek.Open();
+            OleDbCommand komanda = new OleDbCommand("INSERT INTO Roditelji(RoditeljiID,SvojstvoID,Ime,Prezime,Adresa,Fiksni,Mobilni) VALUES(@Roditelji,@SvojstvoID,@Ime,@Prezime,@Adresa,@Fiksni,@Mobilni)",konek);
+            try
+            {
+                if (radioButton1.Checked == true)
+                {
+                    komanda.Parameters.AddWithValue("@RoditeljiID", Convert.ToInt32(textBox1.Text));
+                    komanda.Parameters.AddWithValue("@SvojstvoID", id1);
+                    komanda.Parameters.AddWithValue("@Ime", textBox2.Text);
+                    komanda.Parameters.AddWithValue("@Prezime", textBox3.Text);
+                    komanda.Parameters.AddWithValue("@Adresa", textBox4.Text);
+                    komanda.Parameters.AddWithValue("@Fiksni", maskedTextBox1.Text);
+                    komanda.Parameters.AddWithValue("@Mobilni", maskedTextBox2.Text);
+                }
+                else if (radioButton2.Checked == true)
+                {
+                    komanda.Parameters.AddWithValue("@RoditeljiID", Convert.ToInt32(textBox1.Text));
+                    komanda.Parameters.AddWithValue("@SvojstvoID", id2);
+                    komanda.Parameters.AddWithValue("@Ime", textBox2.Text);
+                    komanda.Parameters.AddWithValue("@Prezime", textBox3.Text);
+                    komanda.Parameters.AddWithValue("@Adresa", textBox4.Text);
+                    komanda.Parameters.AddWithValue("@Fiksni", maskedTextBox1.Text);
+                    komanda.Parameters.AddWithValue("@Mobilni", maskedTextBox2.Text);
+                }
+
+                else if (radioButton3.Checked == true)
+                {
+                    komanda.Parameters.AddWithValue("@RoditeljiID", Convert.ToInt32(textBox1.Text));
+                    komanda.Parameters.AddWithValue("@SvojstvoID", id3);
+                    komanda.Parameters.AddWithValue("@Ime", textBox2.Text);
+                    komanda.Parameters.AddWithValue("@Prezime", textBox3.Text);
+                    komanda.Parameters.AddWithValue("@Adresa", textBox4.Text);
+                    komanda.Parameters.AddWithValue("@Fiksni", maskedTextBox1.Text);
+                    komanda.Parameters.AddWithValue("@Mobilni", maskedTextBox2.Text);
+                }
+
+                komanda.CommandType = CommandType.Text;
+                komanda.ExecuteNonQuery();
+                MessageBox.Show("Uspesno uneto", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            }
+
+            catch{
+                MessageBox.Show("Greska pri upisu","Poruka",MessageBoxButtons.OK,MessageBoxIcon.Information);
+            }
+            konek.Close();
+
+            
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            button5.Enabled = false;
+            Graphics g = pictureBox1.CreateGraphics();
+            Pen penblue = new Pen(Color.Blue);
+            Pen penred = new Pen(Color.Red);
+            Pen pengreen = new Pen(Color.Green);
+            g.DrawEllipse(penblue, 20, 10, 50, 50);
+            g.DrawRectangle(pengreen, 15, 60, 60, 60);
+            g.DrawLine(penred, 15, 60, 0, 120);
+            g.DrawLine(penred, 75, 60, 100, 15);
+            g.DrawLine(penred, 30, 120, 30, 170);
+            g.DrawLine(penred, 60, 120, 60, 170);
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            konek.Open();
+            prvitext = Convert.ToInt32(textBox1.Text);
+            OleDbCommand komanda = new OleDbCommand("Select Count (*) From Roditelji", konek);
+            int row_count = Convert.ToInt32(komanda.ExecuteScalar());
+            OleDbDataAdapter ifaca = new OleDbDataAdapter();
+            OleDbCommand ifkom = new OleDbCommand("Select * From Roditelji", konek);
+            ifaca.SelectCommand = ifkom;
+            ifaca.Fill(tabela2);
+            OleDbCommand makim=new OleDbCommand("Select MAX(RoditeljiID) From Roditelji",konek);
+            int mak=Convert.ToInt32(makim.ExecuteScalar());
+            
+            for (int i =row_count; i > 0; i--)
+            {
+
+                if (prvitext == Convert.ToInt32(tabela2.Rows[i]["RoditeljiID"].ToString()))
+                {
+                   if(Convert.ToInt32(textBox1.Text)==mak)
+                   {
+                       MessageBox.Show("Ne postoji izabrani red", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                       break;
+                   }
+                    else {
+                        textBox2.Text = tabela2.Rows[i+1]["Ime"].ToString();
+                    textBox3.Text = tabela2.Rows[i+1]["Prezime"].ToString();
+                    textBox4.Text = tabela2.Rows[i+1]["Adresa"].ToString();
+                    maskedTextBox1.Text = tabela2.Rows[i+1]["Fiksni"].ToString();
+                    maskedTextBox2.Text = tabela2.Rows[i+1]["Mobilni"].ToString();
+                    textBox1.Text = tabela2.Rows[i+1]["RoditeljiID"].ToString();
+                    prvitext = Convert.ToInt32(textBox1.Text);
+                    }
+                }
+            }
+
+            konek.Close();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            konek.Open();
+            prvitext = Convert.ToInt32(textBox1.Text) - 1;
+            OleDbCommand komanda=new OleDbCommand("Select Count (*) From Roditelji",konek);
+            int row_count=Convert.ToInt32(komanda.ExecuteScalar());    
+            OleDbDataAdapter ifaca=new OleDbDataAdapter();
+            OleDbCommand ifkom=new OleDbCommand("Select * From Roditelji",konek);
+            ifaca.SelectCommand=ifkom;
+            ifaca.Fill(tabela2);
+
+            for (int i = 0; i < row_count;i++ )
+            {
+               
+                if(prvitext==Convert.ToInt32(tabela2.Rows[i]["RoditeljiID"].ToString()))
+                {
+                    textBox2.Text = tabela2.Rows[i]["Ime"].ToString();
+                    textBox3.Text = tabela2.Rows[i]["Prezime"].ToString();
+                    textBox4.Text = tabela2.Rows[i]["Adresa"].ToString();
+                    maskedTextBox1.Text = tabela2.Rows[i]["Fiksni"].ToString();
+                    maskedTextBox2.Text = tabela2.Rows[i]["Mobilni"].ToString();
+                    textBox1.Text = tabela2.Rows[i]["RoditeljiID"].ToString();
+                    prvitext = Convert.ToInt32(textBox1.Text);
+                }
+            }
+
+
+                konek.Close();
+
+        }
+    }
+}
