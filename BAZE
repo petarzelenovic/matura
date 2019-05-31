@@ -1,0 +1,132 @@
+----------------------------1. DVD kolekcija--------------------------------
+a. За продуцента треба да се памти и адреса веб странице на којој врши промоцију својих филмова.
+ALTER TABLE Producent ADD COLUMN WebAdresa varchar(15)
+
+b. Kreiranje tabele Nagrada
+CREATE TABLE Nagrada(
+NagradaID int PRIMARY KEY,
+NazivNagrade varchar(25),
+GodinaPocetka int);
+
+c. Kreiranje tabele Film_Nagrada
+CREATE TABLE Film_Nagrada(
+FilmID int,
+NagradaID int,
+GodinaDobijanja int,
+PRIMARY KEY(FilmID,NagradaID));
+ALTER TABLE Film_Nagrada ADD CONSTRAINT FilmID_FK FOREIGN KEY (FilmID) REFERENCES Film(FilmID);
+ALTER TABLE Film_Nagrada ADD CONSTRAINT NagradaID_FK FOREIGN KEY (NagradaID) REFERENCES Nagrada(NagradaID);
+
+
+
+
+---------------------------2. Skolska biblioteka----------------------------------
+a. За аутора је потребно чувати и звање које има.
+ALTER TABLE Autor ADD COLUMN Zvanje varchar(10) ;
+b. Kreiranje tabele Izdavac
+CREATE TABLE Izdavac(
+IzdavacID int PRIMARY KEY,
+Naziv varchar(25),
+Adresa varchar(25));
+GodinaPocetka int);
+
+c. Kreiranje tabele Izdali
+CREATE TABLE Izdali(
+IzdavacID int,
+KnjigaID int,
+Godina int,
+PRIMARY KEY(IzdavacID,KnjigaID));
+ALTER TABLE Izdali ADD CONSTRAINT IzdavacID_FK FOREIGN KEY (IzdavacID) REFERENCES
+Izdavac(IzdavacID);
+ALTER TABLE Izdali ADD CONSTRAINT KnjigaID_FK FOREIGN KEY (KnjigaID) REFERENCES Knjiga(KnjigaID);
+
+
+--------------------------------3. Evidencija radnika na projektima-----------------------------
+a. Kreiranje tabele Kancelarija
+CREATE TABLE KANCELARIJA(
+KancelarijaID INT,
+Broj int,
+VelicinaKancelarije INT,
+BrojTelefona VARCHAR(100),
+SektorID INT,
+PRIMARY KEY(KancelarijaID));
+
+b. Dodavanje KancelarijaID u tabelu radnik
+ALTER TABLE RADNIK ADD KancelarijaID INT;
+ALTER TABLE RADNIKmADD CONSTRAINT fk_KancelarijaID FOREIGN KEY (KancelarijaID) REFERENCES KANCELARIJA(BrojKancelarije);
+
+c. Kreiranje tabele Sektor
+CREATE TABLE SEKTOR(
+SektorID INT,
+Naziv VARCHAR(30),
+OpisDelatnosti VARCHAR(150),
+PRIMARY KEY(SifraSektora));
+
+d. Kreiranje tabele Sef_Sektora
+CREATE TABLE SEF_SEKTORA(
+SektorID INT,
+RadnikID int,
+PRIMARY KEY (SektorID,RadnikID));
+ALTER TABLE SEF_SEKTORA ADD CONSTRAINT fk_SektorID FOREIGN KEY (SektorID) REFERENCES SEKTOR(SektoRID);
+ALTER TABLE SEF_SEKTORA ADD CONSTRAINT fk_RadnikID FOREIGN KEY (RadnikID) REFERENCES RADNIK(RadnikID);
+
+e. Povezivanje Stranog kljuca u tabeli kancelarija
+ALTER TABLE KANCELARIJAADD CONSTRAINT fk_SektorID FOREIGN KEY (SektorID) REFERENCES SEKTOR(SektorID);
+
+
+
+---------------------------------4. Dnevni boravak dece--------------------------
+a. Креирати табелу активност у којој ће се чувати назив активности и време почетка и завршетка активности.
+CREATE TABLE Aktivnosti(
+AktivnostID int PRIMARY KEY,
+NazivAktivnosti varchar (15),
+DanID int,
+VremePocetka datetime,
+VremeZavrsetka datetime);
+
+b. Kreiranje tabele Dan i povezivanje sa tabelom Aktivnosti
+
+CREATE TABLE Dan(
+DanID int PRIMARY KEY,
+NazivDana varchar(10));
+ALTER TABLE Aktivnosti ADD CONSTRAINT DanID_FK FOREIGN KEY (DanID) REFERENCES Dan(DanID);
+
+c. Registar aktivnosti
+
+CREATE TABLE Registar_Aktivnosti(
+AktivnostID int,
+DeteID int,
+Datum date,
+Prisutno char(2),
+Beleske varchar(40),
+PRIMARY KEY(AktivnostID,DeteID,Datum));
+
+ALTER TABLE Registar_Aktivnosti ADD CONSTRAINT AktivnostID_FK FOREIGN KEY (AktivnostID) REFERENCES Aktivnosti(AktivnostID);
+ALTER TABLE Registar_Aktivnosti ADD CONSTRAINT DeteID_FK FOREIGN KEY (DetetID) REFERENCES Dete(DeteID);
+
+
+
+
+--------------------------------5. Golf klub----------------------------
+a. У табели партија желимо да чувамо и временске услове у којима је партија одиграна.
+ALTER TABLE Partija ADD COLUMN VremenskiUslovi varchar(15);
+
+b. Kreiranje tabele Rupa
+CREATE TABLE Rupa(
+RupaID int,
+TerenID int,
+Opis varchar(50),
+UdaljenostRupe number,
+UdaracaPoRupi int,
+CONSTRAINT TerenID_FK FOREIGN KEY (TerenID) REFERENCES Teren(TerenID),
+PRIMARY KEY (RupaID,TerenID));
+
+c. Rezultat
+CREATE TABLE Rezultat(
+Rbr int,
+PartijaID
+RupaID int,
+Skor int,
+PRIMARY KEY (Rbr,PartijaID,RupaID));
+ALTER TABLE Rezultat ADD CONSTRAINT PartijaID_FK FOREIGN KEY (PartijaID) REFERENCES Partija(PartijaID);
+ALTER TABLE Rezultat ADD CONSTRAINT RupaID_FK FOREIGN KEY (RupaID) REFERENCES Rupa(RupaID);
