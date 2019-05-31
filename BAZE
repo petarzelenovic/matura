@@ -1,6 +1,6 @@
 ----------------------------1. DVD kolekcija--------------------------------
 a. За продуцента треба да се памти и адреса веб странице на којој врши промоцију својих филмова.
-ALTER TABLE Producent ADD COLUMN WebAdresa varchar(15)
+ALTER TABLE Producent ADD COLUMN WebAdresa varchar(15);
 
 b. Kreiranje tabele Nagrada
 CREATE TABLE Nagrada(
