@@ -1,3 +1,6 @@
+--------------------------------------------------DRUGA FORMA---------------------------------------------------
+
+
 namespace Decooo
 {
     public partial class RoditeljiFrm : Form
