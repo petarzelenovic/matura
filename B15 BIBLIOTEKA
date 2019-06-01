@@ -1,0 +1,194 @@
+
+------------------------------------------------FORMA 2-------------------------------------
+
+namespace B15_BIBLIO
+{
+    public partial class Form2 : Form
+    {
+
+        OleDbConnection konek = new OleDbConnection();
+        OleDbDataAdapter adapter = new OleDbDataAdapter();
+        DataTable tabela = new DataTable();
+        public Form2()
+        {
+            InitializeComponent();
+            string putanja = Environment.CurrentDirectory;
+
+            string[] putanjaBaze = putanja.Split(new string[] { "bin" }, StringSplitOptions.None);
+
+            AppDomain.CurrentDomain.SetData("DataDirectory", putanjaBaze[0]);
+
+            konek = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=|DataDirectory|\SkolskaBiblioteka.accdb");
+        }
+
+        private void Form2_Load(object sender, EventArgs e)
+        {
+            konek.Open();
+
+            OleDbCommand komanda = new OleDbCommand("Select * From KNJIGA", konek);
+            adapter.SelectCommand = komanda;
+            adapter.Fill(tabela);
+            for (int i = 0; i < tabela.Rows.Count; i++)
+            {
+                string[] row = { tabela.Rows[i]["KnjigaID"].ToString(), tabela.Rows[i]["UDK"].ToString(), tabela.Rows[i]["ISBN"].ToString(), tabela.Rows[i]["Naziv"].ToString() };
+                var listViewItem = new ListViewItem(row);
+                listView1.Items.Add(listViewItem);
+            }
+
+
+            konek.Close();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            konek.Open();
+            OleDbCommand cmd = new OleDbCommand("Insert Into KNJIGA(KnjigaID,UDK,ISBN,Naziv) VALUES(@KnjigaID,@UDK,@ISBN,@Naziv)", konek);
+            
+            if(textBox1.Text==" ")
+            {
+                MessageBox.Show("Greska pri upisu", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else if (textBox3.Text == "")
+            {
+                MessageBox.Show("Greska pri upisu", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else if (textBox4.Text == "")
+            {
+                MessageBox.Show("Greska pri upisu", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            else
+            {
+                try
+                {
+                    cmd.Parameters.AddWithValue("@KnjigaID", Convert.ToInt32(textBox1.Text));
+                    cmd.Parameters.AddWithValue("@UDK", textBox2.Text);
+                    cmd.Parameters.AddWithValue("@ISBN", textBox3.Text);
+                    cmd.Parameters.AddWithValue("@Naziv", textBox4.Text);
+                    cmd.CommandType = CommandType.Text;
+                    cmd.ExecuteNonQuery();
+                    MessageBox.Show("Uspesno ste uneli u bazu", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    listView1.Items.Clear();
+                    OleDbCommand komanda = new OleDbCommand("Select * From KNJIGA", konek);
+                    adapter.SelectCommand = komanda;
+                    adapter.Fill(tabela);
+                    for (int i = 0; i < tabela.Rows.Count; i++)
+                    {
+                        string[] row = { tabela.Rows[i]["KnjigaID"].ToString(), tabela.Rows[i]["UDK"].ToString(), tabela.Rows[i]["ISBN"].ToString(), tabela.Rows[i]["Naziv"].ToString() };
+                        var listViewItem = new ListViewItem(row);
+                        listView1.Items.Add(listViewItem);
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Greska pri upisu", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+
+
+            konek.Close();
+               
+            
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            konek.Open();
+            OleDbCommand koman = new OleDbCommand("Select * From KNJIGA", konek);
+            adapter.SelectCommand = koman;
+            adapter.Fill(tabela);
+            for (int i = 0; i < tabela.Rows.Count; i++)
+            {
+                if (textBox1.Text == tabela.Rows[i]["KnjigaID"].ToString())
+                {
+                    textBox2.Text = tabela.Rows[i]["UDK"].ToString();
+                    textBox3.Text = tabela.Rows[i]["ISBN"].ToString();
+                    textBox4.Text = tabela.Rows[i]["Naziv"].ToString();
+                   
+                    break;
+                }
+                else
+                {
+                    textBox2.Text = "";
+                    textBox3.Text = "";
+                    textBox4.Text = "";                  
+                }
+            }
+            konek.Close();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            konek.Open();
+            int a = Convert.ToInt32(textBox1.Text);
+            OleDbCommand delete = new OleDbCommand("Delete From KNJIGA Where KnjigaID=" + a + ";", konek);
+
+            try
+            {
+                delete.CommandType = CommandType.Text;
+                delete.ExecuteNonQuery();
+                MessageBox.Show("Uspesno obrisano", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                //listView1.Items.Clear();
+
+            }
+            catch
+            {
+                MessageBox.Show("Greska u brisanju", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            //OleDbCommand komanda2 = new OleDbCommand("Select * From Glumac", konek);
+            //adapter.SelectCommand = komanda2;
+            //adapter.Fill(tabela2);
+
+            //for (int i = 0; i < tabela.Rows.Count; i++)
+            //{
+            //    string[] row = { tabela.Rows[i]["GlumacID"].ToString(), tabela.Rows[i]["Ime"].ToString(), tabela.Rows[i]["Prezime"].ToString(), tabela.Rows[i]["DatumRodjenja"].ToString(), tabela.Rows[i]["MestoRodjenja"].ToString() };
+            //    var listViewItem = new ListViewItem(row);
+            //    listView1.Items.Add(listViewItem);
+            //}
+
+            konek.Close();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            konek.Open();
+            try
+            {
+                int a = Convert.ToInt32(textBox1.Text);
+                OleDbCommand izmeni = new OleDbCommand("Update KNJIGA Set KnjigaID='" + textBox1.Text + "',UDK='" + textBox2.Text + "',ISBN='" + textBox3.Text + "',Naziv='" + textBox4.Text + "' Where KnjigaID=" + a + ";", konek);
+                izmeni.CommandType = CommandType.Text;
+                izmeni.ExecuteNonQuery();
+                MessageBox.Show("Uspesno izmenjeno", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                //listView1.Items.Clear();
+
+            }
+            catch
+            {
+                MessageBox.Show("Greska pri izmeni", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            }
+            //OleDbCommand komanda2 = new OleDbCommand("Select * From Glumac", konek);
+            //adapter2.SelectCommand = komanda2;
+            //adapter2.Fill(tabela2);
+
+            //for (int i = 0; i < tabela.Rows.Count; i++)
+            //{
+            //    string[] row = { tabela.Rows[i]["GlumacID"].ToString(), tabela.Rows[i]["Ime"].ToString(), tabela.Rows[i]["Prezime"].ToString(), tabela.Rows[i]["DatumRodjenja"].ToString(), tabela.Rows[i]["MestoRodjenja"].ToString() };
+            //    var listViewItem = new ListViewItem(row);
+            //    listView1.Items.Add(listViewItem);
+            //}
+
+
+
+            konek.Close();
+        }
+    }
+}
