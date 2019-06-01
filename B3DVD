@@ -1,0 +1,179 @@
+namespace B3_dvd_final
+{
+    public partial class Form1 : Form
+    {
+        OleDbConnection konek = new OleDbConnection();
+        OleDbDataAdapter adapter = new OleDbDataAdapter();
+        OleDbDataAdapter adapter2 = new OleDbDataAdapter();
+        DataTable tabela = new DataTable();
+        DataTable tabela2 = new DataTable();
+        public Form1()
+        {
+            InitializeComponent();
+            string putanja = Environment.CurrentDirectory;
+
+            string[] putanjaBaze = putanja.Split(new string[] { "bin" }, StringSplitOptions.None);
+
+            AppDomain.CurrentDomain.SetData("DataDirectory", putanjaBaze[0]);
+
+            konek = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=|DataDirectory|\DVDkolekcija.accdb");
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            // TODO: This line of code loads data into the 'dVDkolekcijaDataSet.ZANR' table. You can move, or remove it, as needed.
+            this.zANRTableAdapter.Fill(this.dVDkolekcijaDataSet.ZANR);
+
+            konek.Open();
+
+            OleDbCommand komanda = new OleDbCommand("Select * From Glumac", konek);
+            adapter.SelectCommand = komanda;
+            adapter.Fill(tabela);
+            for (int i = 0; i < tabela.Rows.Count; i++)
+            {
+                string[] row = { tabela.Rows[i]["GlumacID"].ToString(), tabela.Rows[i]["Ime"].ToString(), tabela.Rows[i]["Prezime"].ToString(), tabela.Rows[i]["DatumRodjenja"].ToString(), tabela.Rows[i]["MestoRodjenja"].ToString() };
+                var listViewItem = new ListViewItem(row);
+                listView1.Items.Add(listViewItem);
+            }
+
+
+            konek.Close();
+
+
+              
+           
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            konek.Open();
+
+            OleDbCommand cmd = new OleDbCommand("Insert Into Glumac(GlumacID,Ime,Prezime,DatumRodjenja,MestoRodjenja) VALUES(@GlumacID,@Ime,@Prezime,@DatumRodjenja,@MestoRodjenja)", konek);
+            try
+            {
+                cmd.Parameters.AddWithValue("@GlumacID", Convert.ToInt32(textBox1.Text));
+                cmd.Parameters.AddWithValue("@Ime", textBox2.Text);
+                cmd.Parameters.AddWithValue("@Prezime", textBox3.Text);
+                cmd.Parameters.AddWithValue("@DatumRodjenja", textBox4.Text);
+                cmd.Parameters.AddWithValue("@MestoRodjenja", textBox5.Text);
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+                MessageBox.Show("Uspesno ste uneli u bazu", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                listView1.Items.Clear();
+                OleDbCommand komanda = new OleDbCommand("Select * From Glumac", konek);
+                adapter.SelectCommand = komanda;
+                adapter.Fill(tabela);
+                for (int i = 0; i < tabela.Rows.Count; i++)
+                {
+                    string[] row = { tabela.Rows[i]["GlumacID"].ToString(), tabela.Rows[i]["Ime"].ToString(), tabela.Rows[i]["Prezime"].ToString(), tabela.Rows[i]["DatumRodjenja"].ToString(), tabela.Rows[i]["MestoRodjenja"].ToString() };
+                    var listViewItem = new ListViewItem(row);
+                    listView1.Items.Add(listViewItem);
+                }
+
+
+            }
+            catch
+            {
+                MessageBox.Show("Greska pri upisu", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+         
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            konek.Open();
+            OleDbCommand koman = new OleDbCommand("Select * From Glumac", konek);
+            adapter.SelectCommand = koman;
+            adapter.Fill(tabela);
+            for (int i = 0; i < tabela.Rows.Count; i++)
+            {
+                if (textBox1.Text == tabela.Rows[i]["GlumacID"].ToString())
+                {
+                    textBox2.Text = tabela.Rows[i]["Ime"].ToString();
+                    textBox3.Text = tabela.Rows[i]["Prezime"].ToString();
+                    textBox4.Text = tabela.Rows[i]["DatumRodjenja"].ToString();
+                    textBox5.Text = tabela.Rows[i]["MestoRodjenja"].ToString();
+                    break;
+                }
+                else
+                {
+                    textBox2.Text = "";
+                    textBox3.Text = "";
+                    textBox4.Text = "";
+                    textBox5.Text = "";
+
+                }
+            }
+            konek.Close();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            konek.Open();
+            int a = Convert.ToInt32(textBox1.Text);
+            OleDbCommand delete = new OleDbCommand("Delete From Glumac Where GlumacID=" + a + ";", konek);
+
+            try
+            {
+                delete.CommandType = CommandType.Text;
+                delete.ExecuteNonQuery();
+                MessageBox.Show("Uspesno obrisano", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                
+                //listView1.Items.Clear();
+                
+            }
+            catch
+            {
+                MessageBox.Show("Greska u brisanju", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            //OleDbCommand komanda2 = new OleDbCommand("Select * From Glumac", konek);
+            //adapter.SelectCommand = komanda2;
+            //adapter.Fill(tabela2);
+
+            //for (int i = 0; i < tabela.Rows.Count; i++)
+            //{
+            //    string[] row = { tabela.Rows[i]["GlumacID"].ToString(), tabela.Rows[i]["Ime"].ToString(), tabela.Rows[i]["Prezime"].ToString(), tabela.Rows[i]["DatumRodjenja"].ToString(), tabela.Rows[i]["MestoRodjenja"].ToString() };
+            //    var listViewItem = new ListViewItem(row);
+            //    listView1.Items.Add(listViewItem);
+            //}
+           
+            konek.Close();
+           
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            konek.Open();
+            try
+            {
+                int a = Convert.ToInt32(textBox1.Text);
+                OleDbCommand izmeni = new OleDbCommand("Update Glumac Set GlumacID='" + textBox1.Text + "',Ime='" + textBox2.Text + "',Prezime='" + textBox3.Text + "',DatumRodjenja='" + textBox4.Text + "',MestoRodjenja='" + textBox5.Text + "' Where GlumacID=" + a + ";", konek);
+                izmeni.CommandType = CommandType.Text;
+                izmeni.ExecuteNonQuery();
+                MessageBox.Show("Uspesno izmenjeno", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                //listView1.Items.Clear();
+
+            }
+            catch
+            {
+                MessageBox.Show("Greska pri izmeni", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            }
+            //OleDbCommand komanda2 = new OleDbCommand("Select * From Glumac", konek);
+            //adapter2.SelectCommand = komanda2;
+            //adapter2.Fill(tabela2);
+
+            //for (int i = 0; i < tabela.Rows.Count; i++)
+            //{
+            //    string[] row = { tabela.Rows[i]["GlumacID"].ToString(), tabela.Rows[i]["Ime"].ToString(), tabela.Rows[i]["Prezime"].ToString(), tabela.Rows[i]["DatumRodjenja"].ToString(), tabela.Rows[i]["MestoRodjenja"].ToString() };
+            //    var listViewItem = new ListViewItem(row);
+            //    listView1.Items.Add(listViewItem);
+            //}
+
+
+
+            konek.Close();
+        }
+    }
+}
