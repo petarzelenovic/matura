@@ -22,10 +22,7 @@ namespace B3_dvd_final
         }
 
         private void Form1_Load(object sender, EventArgs e)
-        {
-            // TODO: This line of code loads data into the 'dVDkolekcijaDataSet.ZANR' table. You can move, or remove it, as needed.
-            this.zANRTableAdapter.Fill(this.dVDkolekcijaDataSet.ZANR);
-
+        {         
             konek.Open();
 
             OleDbCommand komanda = new OleDbCommand("Select * From Glumac", konek);
