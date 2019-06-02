@@ -1,0 +1,183 @@
+----------------------------------------------------------------------FORMA 2---------------------------------------------------------
+
+namespace evidencija_finalno
+{
+    public partial class Form1 : Form
+    {
+        OleDbConnection konek;
+        OleDbDataAdapter adapter = new OleDbDataAdapter();
+        DataTable tabela = new DataTable();
+        public Form1()
+        {
+            InitializeComponent();
+            string putanja = Environment.CurrentDirectory;
+
+            string[] putanjaBaze = putanja.Split(new string[] { "bin" }, StringSplitOptions.None);
+
+            AppDomain.CurrentDomain.SetData("DataDirectory", putanjaBaze[0]);
+
+            konek = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=|DataDirectory|\Evidencijafin.accdb");
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            // TODO: This line of code loads data into the 'evidencijafinDataSet.Radno_Mesto' table. You can move, or remove it, as needed.
+            this.radno_MestoTableAdapter1.Fill(this.evidencijafinDataSet.Radno_Mesto);
+           
+
+            textBox1.Enabled = false;
+            textBox2.Enabled = false;
+            textBox3.Enabled = false;
+            textBox4.Enabled = false;
+            
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {          
+            if(radioButton1.Checked==true)
+            {
+                konek.Open();
+                OleDbCommand cmd = new OleDbCommand("Insert Into Radno_Mesto(RadnoMestoID,Naziv,Opis,PocetnaPlata,NajvisaPlata) VALUES(@RadnoMestoID,@Naziv,@Opis,@PocetnaPlata,@NajvisaPlata)", konek);
+                if (textBox1.Text == " ")
+                {
+                    MessageBox.Show("Greska pri upisu", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else if (textBox3.Text == "")
+                {
+                    MessageBox.Show("Greska pri upisu", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else if (textBox4.Text == "")
+                {
+                    MessageBox.Show("Greska pri upisu", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    try
+                    {
+                        cmd.Parameters.AddWithValue("@RadnoMestoID", Convert.ToInt32(comboBox1.Text));
+                        cmd.Parameters.AddWithValue("@Naziv", textBox1.Text);
+                        cmd.Parameters.AddWithValue("@Opis", textBox2.Text);
+                        cmd.Parameters.AddWithValue("@PocetnaPlata", Convert.ToInt32(textBox3.Text));
+                        cmd.Parameters.AddWithValue("@NajvisaPlata", Convert.ToInt32(textBox4.Text));
+                        cmd.CommandType = CommandType.Text;
+                        cmd.ExecuteNonQuery();
+                        MessageBox.Show("Uspesno ste uneli u bazu", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                   
+                       
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Greska pri upisu", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                konek.Close();
+            }
+
+            else if(radioButton2.Checked==true)
+            {
+                konek.Open();
+                int a = Convert.ToInt32(comboBox1.Text);
+                OleDbCommand delete = new OleDbCommand("Delete From Radno_Mesto Where RadnoMestoID=" + a + ";", konek);
+
+                try
+                {
+                    delete.CommandType = CommandType.Text;
+                    delete.ExecuteNonQuery();
+                    MessageBox.Show("Uspesno obrisano", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                }
+                catch
+                {
+                    MessageBox.Show("Greska u brisanju", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }              
+
+                konek.Close();
+            }
+
+            else if(radioButton3.Checked==true)
+            {
+                konek.Open();
+                try
+                {
+                    int a = Convert.ToInt32(comboBox1.Text);
+                    OleDbCommand izmeni = new OleDbCommand("Update Radno_Mesto Set RadnoMestoID='" + comboBox1.Text + "',Naziv='" + textBox1.Text + "',Opis='" + textBox2.Text + "',PocetnaPlata='" + Convert.ToInt32(textBox3.Text) + "',NajvisaPlata='" + Convert.ToInt32(textBox4.Text) + "' Where RadnoMestoID=" + a + ";", konek);
+                    izmeni.CommandType = CommandType.Text;
+                    izmeni.ExecuteNonQuery();
+                    MessageBox.Show("Uspesno izmenjeno", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    
+
+                }
+                catch
+                {
+                    MessageBox.Show("Greska pri izmeni", "Poruka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                }
+
+                konek.Close();
+            }
+
+            this.radno_MestoTableAdapter1.Fill(this.evidencijafinDataSet.Radno_Mesto);
+            konek.Close();
+        }
+
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+            comboBox1.Text = "";
+            textBox1.Text = "";
+            textBox2.Text = "";
+            textBox3.Text = "";
+            textBox4.Text = "";
+            textBox1.Enabled = true;
+            textBox2.Enabled = true;
+            textBox3.Enabled = true;
+            textBox4.Enabled = true;
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+           
+            textBox1.Enabled = false;
+            textBox2.Enabled = false;
+            textBox3.Enabled = false;
+            textBox4.Enabled = false;
+        }
+
+        private void radioButton3_CheckedChanged(object sender, EventArgs e)
+        {
+            this.radno_MestoTableAdapter1.Fill(this.evidencijafinDataSet.Radno_Mesto);
+            textBox1.Enabled = true;
+            textBox2.Enabled = true;
+            textBox3.Enabled = true;
+            textBox4.Enabled = true;
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            konek.Open();
+            OleDbCommand koman = new OleDbCommand("Select * From Radno_Mesto", konek);
+            adapter.SelectCommand = koman;
+            adapter.Fill(tabela);
+            for (int i = 0; i < tabela.Rows.Count; i++)
+            {
+                if (comboBox1.Text == tabela.Rows[i]["RadnoMestoID"].ToString())
+                {
+                    textBox1.Text = tabela.Rows[i]["Naziv"].ToString();
+                    textBox2.Text = tabela.Rows[i]["Opis"].ToString();
+                    textBox3.Text = tabela.Rows[i]["PocetnaPlata"].ToString();
+                    textBox4.Text = tabela.Rows[i]["NajvisaPlata"].ToString();
+
+                    break;
+                }
+                else
+                {
+                    textBox2.Text = "";
+                    textBox3.Text = "";
+                    textBox4.Text = "";
+                   
+                }
+            }
+            konek.Close();
+        }
+    }
+}
