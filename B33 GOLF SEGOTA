@@ -1,0 +1,478 @@
+-------------------------------------------------------------FORMA 2---------------------------------------------------------------------
+namespace EIT_B33_Segota_Filip
+{
+    public partial class Igraci : Form
+    {
+        OleDbConnection con;
+        bool postoji = false;
+        public Igraci()
+        {
+            InitializeComponent();
+            string putanja = Environment.CurrentDirectory;
+            string[] putanjaBaze = putanja.Split(new string[] { "bin" }, StringSplitOptions.None);
+            AppDomain.CurrentDomain.SetData("DataDirectory", putanjaBaze[0]);
+
+            con = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=|DataDirectory|\GolfKlub.accdb");
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Igraci_Load(object sender, EventArgs e)
+        {
+            OleDbCommand cmd = new OleDbCommand("select IgracID from Igrac", con);
+            con.Open();
+            OleDbDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                comboBox1.Items.Add(reader[0]);
+            }
+            cmd = new OleDbCommand("select Grad from Grad order by Grad", con);
+            reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                comboBox2.Items.Add(reader[0]);
+            }
+            comboBox2.SelectedIndex = 0;
+            reader.Close();
+            cmd.Dispose();
+            con.Close();
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            OleDbCommand cmd = new OleDbCommand("select Igrac.Ime, Igrac.Prezime, Igrac.Adresa, Grad.Grad, Igrac.Email, Igrac.Telefon " +
+                                                "from Igrac inner join Grad on Igrac.GradID = Grad.GradID " +
+                                                "where IgracID = @id", con);
+            cmd.Parameters.AddWithValue("@id", comboBox1.SelectedItem.ToString());
+            con.Open();
+            OleDbDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                postoji = true;
+                textBox1.Text = reader[0].ToString();
+                textBox2.Text = reader[1].ToString();
+                textBox3.Text = reader[2].ToString();
+                textBox4.Text = reader[4].ToString();
+                maskedTextBox1.Text = reader[5].ToString();
+
+                int selected = new int();
+                for (int i = 0; i < comboBox2.Items.Count; i++)
+                {
+                    if (comboBox2.Items[i].ToString() == reader[3].ToString())
+                    {
+                        selected = i;
+                    }
+                }
+                comboBox2.SelectedIndex = selected;
+            }
+            reader.Close();
+            cmd.Dispose();
+            con.Close();
+        }
+
+        private void comboBox1_TextChanged(object sender, EventArgs e)
+        {
+            postoji = false;
+                OleDbCommand cmd = new OleDbCommand("select Igrac.Ime, Igrac.Prezime, Igrac.Adresa, Grad.Grad, Igrac.Email, Igrac.Telefon " +
+                                                "from Igrac inner join Grad on Igrac.GradID = Grad.GradID " +
+                                                "where IgracID = @id", con);
+                cmd.Parameters.AddWithValue("@id", comboBox1.Text);
+                con.Open();
+                int id;
+                if (int.TryParse(comboBox1.Text, out id))
+                {
+                    OleDbDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        postoji = true;
+                        textBox1.Text = reader[0].ToString();
+                        textBox2.Text = reader[1].ToString();
+                        textBox3.Text = reader[2].ToString();
+                        textBox4.Text = reader[4].ToString();
+                        maskedTextBox1.Text = reader[5].ToString();
+
+                        int selected = new int();
+                        for (int i = 0; i < comboBox2.Items.Count; i++)
+                        {
+                            if (comboBox2.Items[i].ToString() == reader[3].ToString())
+                            {
+                                selected = i;
+                            }
+                        }
+                        comboBox2.SelectedIndex = selected;
+                    }
+                    if (!postoji)
+                    {
+                        textBox1.Text = "";
+                        textBox2.Text = "";
+                        textBox3.Text = "";
+                        textBox4.Text = "";
+                        maskedTextBox1.Text = "";
+                        comboBox2.SelectedIndex = 0;
+                    }
+                    reader.Close();
+                }
+                else {
+                    textBox1.Text = "";
+                    textBox2.Text = "";
+                    textBox3.Text = "";
+                    textBox4.Text = "";
+                    maskedTextBox1.Text = "";
+                    comboBox2.SelectedIndex = 0;
+                }
+                cmd.Dispose();
+                con.Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (postoji)
+            {
+                MessageBox.Show("Igrac sa unetom sifrom vec postoji!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                int id;
+                if (int.TryParse(comboBox1.Text, out id))
+                {
+                    string text = textBox4.Text;
+                    bool mejl = true;
+                    if (text.IndexOf('@') == -1)
+                    {
+                        mejl = false;
+                    }
+                    else if (text.IndexOf('.', text.IndexOf('@')) == -1)
+                    {
+                        mejl = false;
+                    }
+                    string broj = maskedTextBox1.Text;
+                    broj = broj.Replace("-", "");
+                    broj = broj.Replace("(", "");
+                    broj = broj.Replace(")", "");
+                    broj = broj.Replace(" ", "");
+
+                    if (textBox1.Text == "" || textBox2.Text == "" || textBox3.Text == "" || textBox4.Text == "")
+                    {
+                        MessageBox.Show("Niste uneli potrebne podatke!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else if (!mejl)
+                    {
+                        MessageBox.Show("Nepravilan format mejla!\nMejl treba biti u formatu neko@mejl.com", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else if (broj.Count() <9 || broj.Count() >10)
+                    {
+                        MessageBox.Show("Nepravilan format telefona!\nTelefon treba biti u formatu (___)___-____!\nBroj mora da ima 9 ili 10 cifara!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        OleDbCommand cmd = new OleDbCommand("insert into Igrac(IgracID, Ime, Prezime, Adresa, GradID, Email, Telefon) values(@id, @ime, @prezime, @adresa, @gradid, @email, @telefon)", con);
+                        OleDbCommand cmd2 = new OleDbCommand("select Grad.GradID from Grad where Grad = @grad", con);
+                        cmd2.Parameters.AddWithValue("@grad", comboBox2.Text);
+                        con.Open();
+                        OleDbDataReader reader = cmd2.ExecuteReader();
+                        int idgrada = new int();
+                        while (reader.Read())
+                        {
+                            int.TryParse(reader[0].ToString(), out idgrada);
+                        }
+                        cmd.Parameters.AddWithValue("@id", id);
+                        cmd.Parameters.AddWithValue("@ime", textBox1.Text);
+                        cmd.Parameters.AddWithValue("@prezime", textBox2.Text);
+                        cmd.Parameters.AddWithValue("@adresa", textBox3.Text);
+                        cmd.Parameters.AddWithValue("@gradid", idgrada);
+                        cmd.Parameters.AddWithValue("@email", text);
+                        cmd.Parameters.AddWithValue("@telefon", broj);
+
+                        OleDbDataAdapter adapter = new OleDbDataAdapter();
+                        adapter.InsertCommand = cmd;
+                        adapter.InsertCommand.ExecuteNonQuery();
+                        MessageBox.Show("Podaci su uspesno upisani.", id.ToString() +".-"+ textBox1.Text + " " + textBox2.Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        postoji = true;
+
+                        cmd = new OleDbCommand("select IgracID from Igrac", con);
+                        reader = cmd.ExecuteReader();
+
+                        comboBox1.Items.Clear();
+
+                        while (reader.Read())
+                        {
+                            comboBox1.Items.Add(reader[0]);
+                        }
+
+                        reader.Close();
+                        cmd2.Dispose();
+                        cmd.Dispose();
+                        adapter.Dispose();
+                        con.Close();
+                    }
+                }
+                else
+                {
+                    if (comboBox1.Text == "")
+                    {
+                        MessageBox.Show("Niste uneli sifru igraca!\nSifra igraca treba da bude broj!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Niste uneli pravilnu sifru igraca!\nSifra igraca treba da bude broj!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (!postoji)
+            {
+                MessageBox.Show("Igrac sa unetom sifrom ne postoji!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                int id = new int();
+                if (int.TryParse(comboBox1.Text, out id))
+                {
+                    OleDbCommand cmd = new OleDbCommand("delete from Igrac where IgracID = @id", con);
+                    cmd.Parameters.AddWithValue("@id", id);
+                    con.Open();
+
+                    OleDbDataAdapter adapter = new OleDbDataAdapter();
+                    adapter.DeleteCommand = cmd;
+                    adapter.DeleteCommand.ExecuteNonQuery();
+
+                    MessageBox.Show("Podaci igraca sa rednim brojem " + id.ToString() + ". je uspesno izbrisani.", "Brisanje!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    postoji = false;
+                    cmd = new OleDbCommand("select IgracID from Igrac", con);
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    comboBox1.Items.Clear();
+                    while (reader.Read())
+                    {
+                        comboBox1.Items.Add(reader[0]);
+                    }
+                    textBox1.Text = "";
+                    textBox2.Text = "";
+                    textBox3.Text = "";
+                    textBox4.Text = "";
+                    maskedTextBox1.Text = "";
+                    con.Close();
+                }
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (!postoji)
+            {
+                MessageBox.Show("Igrac sa unetom sifrom ne postoji!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                int id;
+                if (int.TryParse(comboBox1.Text, out id))
+                {
+                    string text = textBox4.Text;
+                    bool mejl = true;
+                    if (text.IndexOf('@') == -1)
+                    {
+                        mejl = false;
+                    }
+                    else if (text.IndexOf('.', text.IndexOf('@')) == -1)
+                    {
+                        mejl = false;
+                    }
+                    string broj = maskedTextBox1.Text;
+                    broj = broj.Replace("-", "");
+                    broj = broj.Replace("(", "");
+                    broj = broj.Replace(")", "");
+                    broj = broj.Replace(" ", "");
+
+                    if (textBox1.Text == "" || textBox2.Text == "" || textBox3.Text == "" || textBox4.Text == "")
+                    {
+                        MessageBox.Show("Niste uneli potrebne podatke!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else if (!mejl)
+                    {
+                        MessageBox.Show("Nepravilan format mejla!\nMejl treba biti u formatu neko@mejl.com", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else if (broj.Count() < 9 || broj.Count() > 10)
+                    {
+                        MessageBox.Show("Nepravilan format telefona!\nTelefon treba biti u formatu (___)___-____!\nBroj mora da ima 9 ili 10 cifara!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        OleDbCommand cmd = new OleDbCommand("update Igrac set Ime=@ime, Prezime=@prezime, Adresa=@adresa, GradID=@gradid, Email=@email, Telefon=@telefon where IgracID = @id", con);
+                        OleDbCommand cmd2 = new OleDbCommand("select Grad.GradID from Grad where Grad = @grad", con);
+                        cmd2.Parameters.AddWithValue("@grad", comboBox2.Text);
+                        con.Open();
+                        OleDbDataReader reader = cmd2.ExecuteReader();
+                        int idgrada = new int();
+                        while (reader.Read())
+                        {
+                            int.TryParse(reader[0].ToString(), out idgrada);
+                        }
+                        cmd.Parameters.AddWithValue("@ime", textBox1.Text);
+                        cmd.Parameters.AddWithValue("@prezime", textBox2.Text);
+                        cmd.Parameters.AddWithValue("@adresa", textBox3.Text);
+                        cmd.Parameters.AddWithValue("@gradid", idgrada);
+                        cmd.Parameters.AddWithValue("@email", text);
+                        cmd.Parameters.AddWithValue("@telefon", broj);
+                        cmd.Parameters.AddWithValue("@id", id);
+
+                        OleDbDataAdapter adapter = new OleDbDataAdapter();
+                        adapter.UpdateCommand = cmd;
+                        adapter.UpdateCommand.ExecuteNonQuery();
+                        MessageBox.Show("Podaci su uspesno azurirani.", id.ToString() + ".-" + textBox1.Text + " " + textBox2.Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        postoji = true;
+
+                        cmd = new OleDbCommand("select IgracID from Igrac", con);
+                        reader = cmd.ExecuteReader();
+                        comboBox1.Items.Clear();
+                        while (reader.Read())
+                        {
+                            comboBox1.Items.Add(reader[0]);
+                        }
+
+                        reader.Close();
+                        cmd2.Dispose();
+                        cmd.Dispose();
+                        adapter.Dispose();
+                        con.Close();
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------TRECA FORMA ALI NE RADI LEPO PORAVITI SAMO UNOS ZA DATUM------------------------
+---------------------------------------------------------------------------------------------------------------------------------------
+
+
+namespace EIT_B33_Segota_Filip
+{
+    public partial class SpisakTerena : Form
+    {
+        OleDbConnection con;
+        DateTime date1, date2;
+        bool pom;
+        public SpisakTerena()
+        {
+            InitializeComponent();
+            string putanja = Environment.CurrentDirectory;
+            string[] putanjaBaze = putanja.Split(new string[] { "bin" }, StringSplitOptions.None);
+            AppDomain.CurrentDomain.SetData("DataDirectory", putanjaBaze[0]);
+
+            con = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=|DataDirectory|\GolfKlub.accdb");
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void SpisakTerena_Load(object sender, EventArgs e)
+        {
+            comboBox1.SelectedIndex = 0;
+            comboBox2.SelectedIndex = 0;
+            comboBox3.SelectedIndex = 0;
+            comboBox4.SelectedIndex = 0;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string datum1 = comboBox3.Text + "." + comboBox1.Text + "." + maskedTextBox1.Text;
+            string datum2 = comboBox4.Text + "." + comboBox2.Text + "." + maskedTextBox2.Text;
+            if (!(DateTime.TryParse(datum1, out date1)) || !(DateTime.TryParse(datum2, out date2)))
+            {
+                MessageBox.Show("Nepravilno unet datum ili uneti datum ne postoji!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                OleDbCommand cmd = new OleDbCommand("select distinct Teren.TerenID, Teren.Teren " +
+                                                    "from Teren inner join Partija on Teren.TerenID = Partija.TerenID " + 
+                                                    "where Partija.Datum between @dat1 and @dat2 " +
+                                                    "order by Teren.TerenID", con);
+                cmd.Parameters.AddWithValue("@dat1", date1);
+                cmd.Parameters.AddWithValue("@dat2", date2);
+
+                con.Open();
+                OleDbDataReader reader = cmd.ExecuteReader();
+                dataGridView1.Rows.Clear();
+                while (reader.Read())
+                {
+                    int br = new int();
+                    OleDbCommand cmd2 = new OleDbCommand("select Partija.PartijaID from Partija where Partija.TerenID = @id and Partija.Datum between @dat1 and @dat2", con);
+                    cmd2.Parameters.AddWithValue("@id", reader[0]);
+                    cmd2.Parameters.AddWithValue("@dat1", date1);
+                    cmd2.Parameters.AddWithValue("@dat2", date2);
+                    OleDbDataReader reader2 = cmd2.ExecuteReader();
+                    while (reader2.Read())
+                    {
+                        br++;
+                    }
+                    reader2.Close();
+                    cmd2.Dispose();
+                    pom = false;
+                    dataGridView1.Rows.Add(reader[0], reader[1], br);
+                }
+                reader.Close();
+                cmd.Dispose();
+                con.Close();
+                pom = true;
+            }
+        }
+
+        private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dataGridView1.SelectedRows.Count > 0)
+            {
+                listView1.Items.Clear();
+                OleDbCommand cmd = new OleDbCommand("select Partija.PartijaID, Partija.Datum " +
+                                                    "from Partija inner join Teren on Partija.TerenID = Teren.TerenID " +
+                                                    "where Teren.TerenID = @id and Partija.Datum between @dat1 and @dat2 " +
+                                                    "order by Partija.Datum, Partija.PartijaID", con);
+
+                cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells[0].Value);
+                cmd.Parameters.AddWithValue("@dat1", date1);
+                cmd.Parameters.AddWithValue("@dat2", date2);
+
+                if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
+
+                OleDbDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    DateTime d;
+                    DateTime.TryParse(reader[1].ToString(), out d);
+                    string[] str = new string[] { reader[0].ToString(), d.ToShortDateString()};
+                    ListViewItem item = new ListViewItem(str);
+                    listView1.Items.Add(item);
+                }
+                reader.Close();
+                cmd.Dispose();
+                if (pom)
+                {
+                    con.Close();
+                }
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
