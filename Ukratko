@@ -1,0 +1,193 @@
+1. TextChanged
+2. Popuna ListView-a
+3. Cecina putanja
+4. Datum iz baze (rider-a) u textBox i obrnuto
+5. Popuna combobox-a sa nazivom kada je u bazi upisan ID
+6. Upis ID-a u bazu kada je u Combobox-u ispisan naziv
+7. Upis ID-a u bazu kada je u Combobox-u ispisan naziv (SORTIRANO)
+8. Popuna GridView-a
+
+
+
+1.TextChanged
+ private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            
+                if (textBox1.Text != "")
+                {
+                    int id = 0;
+                    bool ima = false;
+                    try
+                    {
+                        id = Convert.ToInt32(textBox1.Text);
+
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Sifra mora biti broj! Unesite opet");
+                        textBox1.Text = "";
+                    }
+                    komanda = new OleDbCommand("Select * from Glumac", konekcija);
+                    konekcija.Open();
+                    
+                    rider = komanda.ExecuteReader();
+                    while(rider.Read())
+                    {
+                        if(id==Convert.ToInt32(rider[0].ToString()))
+                        {
+                            ima = true;
+                            break;
+                        }
+                    }
+                    if(ima)
+                    {
+                        textBox2.Text = rider[1].ToString();
+                        textBox3.Text = rider[2].ToString();
+                    if (rider[3].ToString() != "")
+                    {
+                        DateTime datum = Convert.ToDateTime(rider[3].ToString());
+                        textBox4.Text = datum.ToShortDateString();
+                    }
+                    else
+                    {
+                        textBox4.Text = "";
+                    }
+
+                    if (rider[4].ToString() != "")
+                    {
+                        textBox5.Text = rider[4].ToString();
+                    }
+                    else
+                    {
+                        textBox5.Text = "";
+                    }
+                }
+                    else
+                    {
+                        textBox2.Text = "";
+                        textBox3.Text = "";
+                        textBox4.Text = "";
+                        textBox5.Text = "";
+
+                    }
+                    konekcija.Close();
+
+                }
+                else
+                {
+                    textBox2.Text = "";
+                    textBox3.Text = "";
+                    textBox4.Text = "";
+                    textBox5.Text = "";
+                }
+            
+        }
+		
+		
+2. Popuna ListView-a
+   void PopunaListView()
+        {
+            konekcija.Open();
+            komanda = new OleDbCommand("Select * from Glumac order by GlumacID", konekcija);
+            OleDbDataReader rider;
+            rider = komanda.ExecuteReader();
+            listView1.Items.Clear();
+            while (rider.Read())
+            {
+                ListViewItem lv = new ListViewItem(rider[0].ToString());
+                lv.SubItems.Add(rider[1].ToString());
+                lv.SubItems.Add(rider[2].ToString());
+                if (rider[3].ToString() != "")
+                {
+                    lv.SubItems.Add(Convert.ToDateTime(rider[3].ToString()).ToShortDateString());
+                }
+                else
+                {
+                    lv.SubItems.Add("");
+                }
+                if (rider[4].ToString() != "")
+                {
+                    lv.SubItems.Add(rider[4].ToString());
+                }
+                else
+                {
+                    lv.SubItems.Add("");
+                }
+                listView1.Items.Add(lv);
+
+            }
+            rider.Close();
+            komanda.Dispose();
+            konekcija.Close();
+        }
+		
+		
+		
+3. Cecina putanja
+string putanja = Environment.CurrentDirectory;
+            string[] putanjaBaze = putanja.Split(new string[] { "bin" }, StringSplitOptions.None);
+            AppDomain.CurrentDomain.SetData("DataDirectory", putanjaBaze[0]);
+            konekcija = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=|DataDirectory|\DVDkolekcija.accdb");
+			
+			
+4. Datum iz baze (rider-a) u textBox i obrnuto
+if (rider[3].ToString() != "")
+                    {
+                        DateTime datum = Convert.ToDateTime(rider[3].ToString());
+                        textBox4.Text = datum.ToShortDateString();
+                    }
+                    else
+                    {
+                        textBox4.Text = "";
+                    }
+//obrnuto					
+if(textBox4.Text!="")
+                    {
+                        DateTime datum = Convert.ToDateTime(textBox4.Text);
+                        komanda.Parameters.AddWithValue("@DatumRodjenja", datum);
+                    }
+                    else
+                    {
+                        komanda.Parameters.AddWithValue("@DatumRodjenja", DBNull.Value);
+                    }
+					
+		
+5. Popuna combobox-a sa nazivom kada je u bazi upisan ID
+         comboBox1.SelectedItem = comboBox1.Items[Convert.ToInt32(rider[3].ToString())-1];
+
+
+6. Upis ID-a u bazu kada je u Combobox-u ispisan naziv
+         komanda.Parameters.AddWithValue("@ktg", comboBox1.SelectedIndex);
+
+
+7. Upis ID-a u bazu kada je u Combobox-u ispisan naziv (SORTIRANO)
+                    komanda.CommandText = "SELECT GradID FROM Grad WHERE Grad='" + cbGrad.Text + "';";
+					rider = komanda.ExecuteReader();
+					int gradID = Convert.ToInt32(rider[0].ToString());
+					komanda.CommandText = "Insert into Stadion(StadionID, Naziv, GradID) values (@id, @nzv, @gradID)";
+					komanda.Parameters.AddWithValue("@id", Convert.ToInt32(textBox1.Text);
+					komanda.Parameters.AddWithValue("@nzv", textBox2.Text);
+					komanda.AddWithValue("@gradID", gradID.ToString());
+
+
+8. Popuna GridView-a
+con.Open();
+                rider=cmd.ExecuteReader();
+                if (rider.HasRows)
+                {
+                    int i = 0;
+                    
+                    while (rider.Read())
+                    {
+                        DataGridViewRow row = (DataGridViewRow)dataGridView1.Rows[i].Clone();
+                        row.Cells[0].Value = rider[0].ToString();
+                        row.Cells[1].Value = rider[1].ToString();
+                        dataGridView1.Rows.Add(row);
+                        i++;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Nema poklapanja!", "Obavestenje!");
+                }
+                con.Close();
