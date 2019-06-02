@@ -1,0 +1,380 @@
+---------------------------------------------------------------FORMA 2-----------------------------------------------------------------
+namespace B21
+{
+    public partial class frmRadnaMestaUnos : Form
+    {
+        public frmRadnaMestaUnos()
+        {
+            InitializeComponent();
+        }
+
+        private void BtnIzadji_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void FrmRadnaMestaUnos_Load(object sender, EventArgs e)
+        {
+            // TODO: This line of code loads data into the 'dsEvidencija.Radno_Mesto' table. You can move, or remove it, as needed.
+            this.radno_MestoTableAdapter.Fill(this.dsEvidencija.Radno_Mesto);
+
+            ComboSifra_SelectedIndexChanged(null, null);
+        }
+
+        private void RadioBrisanje_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!radioBrisanje.Checked)
+            {
+                return;
+            }
+
+            txtNaziv.Enabled = txtOpis.Enabled = txtPocetnaPlata.Enabled = txtNajvisaPlata.Enabled = false;
+        }
+
+        private void RadioIzmena_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!radioIzmena.Checked)
+            {
+                return;
+            }
+
+            txtNaziv.Enabled = txtOpis.Enabled = txtPocetnaPlata.Enabled = txtNajvisaPlata.Enabled = true;
+        }
+
+        private void RadioUpis_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!radioUpis.Checked)
+            {
+                return;
+            }
+
+            txtNaziv.Enabled = txtOpis.Enabled = txtPocetnaPlata.Enabled = txtNajvisaPlata.Enabled = true;
+        }
+
+        private void Upis()
+        {
+            float pocetnaPlata;
+            float najvisaPlata;
+            short sifra;
+
+            if (string.IsNullOrEmpty(txtNaziv.Text.Trim()))
+            {
+                Util.Warn("Naziv je obavezno polje.");
+                txtNaziv.Focus();
+                txtNaziv.SelectAll();
+                return;
+            }
+
+            if (!(short.TryParse(comboSifra.Text, out sifra)) || sifra < 0)
+            {
+                Util.Warn("Sifra mora biti pozitivan broj.");
+                comboSifra.Focus();
+                comboSifra.SelectAll();
+                return;
+            }
+
+            if (!(float.TryParse(txtPocetnaPlata.Text, out pocetnaPlata)) || pocetnaPlata < 0)
+            {
+                Util.Warn("Pocetna plata mora biti pozitivan broj.");
+                txtPocetnaPlata.Focus();
+                txtPocetnaPlata.SelectAll();
+                return;
+            }
+
+            if (string.IsNullOrEmpty(txtNajvisaPlata.Text.Trim()))
+            {
+                najvisaPlata = -1;
+            }
+            else if (!(float.TryParse(txtNajvisaPlata.Text, out najvisaPlata)) || najvisaPlata < 0)
+            {
+                Util.Warn("Najvisa plata mora biti pozitivan broj.");
+                txtNajvisaPlata.Focus();
+                txtNajvisaPlata.SelectAll();
+                return;
+            }
+
+            try
+            {
+                var mesto = dsEvidencija.Radno_Mesto.NewRadno_MestoRow();
+                mesto.RadnoMestoID = sifra;
+                mesto.Naziv = txtNaziv.Text;
+                if (!string.IsNullOrEmpty(txtOpis.Text.Trim()))
+                    mesto.Opis = txtOpis.Text;
+                mesto.PocetnaPlata = pocetnaPlata;
+                if (najvisaPlata != -1)
+                    mesto.NajvisaPlata = najvisaPlata;
+
+                dsEvidencija.Radno_Mesto.AddRadno_MestoRow(mesto);
+                radno_MestoTableAdapter.Update(dsEvidencija.Radno_Mesto);
+                Util.Info("Uspesno ubaceno u bazu podataka.");
+            }
+            catch (ConstraintException)
+            {
+                Util.Warn("Ova sifra vec postoji u bazi podataka.");
+                comboSifra.Focus();
+                comboSifra.SelectAll();
+            }
+            catch (Exception ex)
+            {
+                Util.Error("Doslo je do greske pri komuniciranju sa bazom.");
+                throw ex;
+            }
+        }
+
+        private void Brisanje()
+        {
+            int sifra;
+            if (!(int.TryParse(comboSifra.Text, out sifra)) || sifra < 0)
+            {
+                Util.Warn("Sifra mora biti pozitivan broj.");
+                comboSifra.Focus();
+                comboSifra.SelectAll();
+                return;
+            }
+
+            try
+            {
+                var mesto = dsEvidencija.Radno_Mesto.FindByRadnoMestoID(sifra);
+                if (mesto == null)
+                {
+                    Util.Warn("Ne postoji radno mesto sa ovom sifrom u bazi podataka.");
+                    comboSifra.Focus();
+                    comboSifra.SelectAll();
+                    return;
+                }
+
+                mesto.Delete();
+                UpdateFields(int.Parse(comboSifra.Text));
+                radno_MestoTableAdapter.Update(dsEvidencija.Radno_Mesto);
+                Util.Info("Uspesno obrisano iz baze podataka");
+            } catch (Exception ex)
+            {
+                Util.Error("Doslo je do greske pri komuniciranju sa bazom podataka.");
+                throw ex;
+            }
+            
+        }
+
+        private void Izmena()
+        {
+            int sifra;
+            float pocetnaPlata;
+            float najvisaPlata;
+            if (!(int.TryParse(comboSifra.Text, out sifra)) || sifra < 0)
+            {
+                Util.Warn("Sifra mora biti pozitivan broj.");
+                comboSifra.Focus();
+                comboSifra.SelectAll();
+                return;
+            }
+
+            if (string.IsNullOrEmpty(txtNaziv.Text.Trim()))
+            {
+                Util.Warn("Naziv je obavezno polje.");
+                txtNaziv.Focus();
+                txtNaziv.SelectAll();
+                return;
+            }
+
+            if (!(int.TryParse(comboSifra.Text, out sifra)) || sifra < 0)
+            {
+                Util.Warn("Sifra mora biti pozitivan broj.");
+                comboSifra.Focus();
+                comboSifra.SelectAll();
+                return;
+            }
+
+            if (!(float.TryParse(txtPocetnaPlata.Text, out pocetnaPlata)) || pocetnaPlata < 0)
+            {
+                Util.Warn("Pocetna plata mora biti pozitivan broj.");
+                txtPocetnaPlata.Focus();
+                txtPocetnaPlata.SelectAll();
+                return;
+            }
+
+            if (string.IsNullOrEmpty(txtNajvisaPlata.Text.Trim()))
+            {
+                najvisaPlata = -1;
+            }
+            else if (!(float.TryParse(txtNajvisaPlata.Text, out najvisaPlata)) || najvisaPlata < 0)
+            {
+                Util.Warn("Najvisa plata mora biti pozitivan broj.");
+                txtNajvisaPlata.Focus();
+                txtNajvisaPlata.SelectAll();
+                return;
+            }
+
+            try
+            {
+                var mesto = dsEvidencija.Radno_Mesto.FindByRadnoMestoID(sifra);
+                if (mesto == null)
+                {
+                    Util.Warn("Ne postoji radno mesto sa ovom sifrom u bazi podataka.");
+                    comboSifra.Focus();
+                    comboSifra.SelectAll();
+                    return;
+                }
+
+                string oldOpis = txtOpis.Text;
+                string oldNajvisaPlata = txtNajvisaPlata.Text;
+
+                mesto.Naziv = txtNaziv.Text;
+                if (string.IsNullOrEmpty(txtOpis.Text.Trim())) mesto.SetOpisNull();
+                else mesto.Opis = txtOpis.Text;
+                mesto.PocetnaPlata = pocetnaPlata;
+                if (najvisaPlata == -1) mesto.SetNajvisaPlataNull();
+                else mesto.NajvisaPlata = najvisaPlata;
+                radno_MestoTableAdapter.Update(dsEvidencija.Radno_Mesto);
+                Util.Info("Uspesno sacuvane promene u bazu podataka");
+                txtOpis.Text = oldOpis;
+                txtNajvisaPlata.Text = oldNajvisaPlata;
+            }
+            catch (Exception ex)
+            {
+                Util.Error("Doslo je do greske pri komuniciranju sa bazom podataka.");
+                throw ex;
+            }
+        }
+
+        private void BtnIzvrsi_Click(object sender, EventArgs e)
+        {
+            if (radioUpis.Checked)
+            {
+                Upis();
+                return;
+            }
+
+            if (radioBrisanje.Checked)
+            {
+                Brisanje();
+                return;
+            }
+
+            if (radioIzmena.Checked)
+            {
+                Izmena();
+                return;
+            }
+        }
+
+        private void UpdateFields(int id)
+        {
+            var mesto = dsEvidencija.Radno_Mesto.FindByRadnoMestoID(id);
+
+            txtNaziv.Text = mesto.Naziv;
+            if (!mesto.IsOpisNull())
+                txtOpis.Text = mesto.Opis;
+            txtPocetnaPlata.Text = mesto.PocetnaPlata.ToString();
+            if (!mesto.IsNajvisaPlataNull())
+                txtNajvisaPlata.Text = mesto.NajvisaPlata.ToString();
+        }
+
+        private void ComboSifra_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(comboSifra.Text))
+            {
+                return;
+            }
+
+            int sifra = (int)comboSifra.SelectedValue;
+            UpdateFields(sifra);
+        }
+    }
+}
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------FORMA 3 SA GRIDVIEWOM----------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------
+
+namespace B21
+{
+    public partial class frmNezavrseniProjekti : Form
+    {
+        public frmNezavrseniProjekti()
+        {
+            InitializeComponent();
+        }
+
+        private void FrmNezavrseniProjekti_Load(object sender, EventArgs e)
+        {
+            
+            // TODO: This line of code loads data into the 'dsEvidencija.Projekat' table. You can move, or remove it, as needed.
+            this.projekatTableAdapter.Fill(this.dsEvidencija.Projekat);
+            this.radnikTableAdapter.Fill(this.dsEvidencija.Radnik);
+
+            gridViewRadnici.Columns[1].HeaderText = "Ime i prezime";
+
+            var query =
+                from projekat in dsEvidencija.Projekat.AsEnumerable()
+                where projekat.Field<bool>("ProjekatZavrsen") == false
+                let difference = DateTime.Now - projekat.Field<DateTime>("DatumPocetka")
+                let godine = difference.Days / 365
+                let meseci = (difference.Days - (godine * 365)) / 30
+                let dani = difference.Days % 30
+                select new
+                {
+                    ID = projekat.Field<short>("ProjekatID"),
+                    Naziv = projekat.Field<string>("Naziv"),
+                    Godine = godine,
+                    Meseci = meseci,
+                    Dani = dani
+                };
+
+            foreach (var result in query)
+            {
+                DataRow row = dtNezavrseniProjekti.Rows.Add();
+                row.SetField("ID", result.ID);
+                row.SetField("Naziv", result.Naziv);
+                row.SetField("Godine", result.Godine);
+                row.SetField("Meseci", result.Meseci);
+                row.SetField("Dani", result.Dani);
+            }
+
+            if (gridViewProjekti.Rows.Count > 0)
+            {
+                gridViewProjekti.CurrentCell = gridViewProjekti.Rows[0].Cells[0];
+                GridViewProjekti_CellClick(null, null);
+            }
+        }
+
+        private void BtnIzadji_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void GridViewProjekti_CellClick(object sender, DataGridViewCellEventArgs e)
+        {   
+            int index = gridViewProjekti.CurrentCell.RowIndex;
+            short sifra = (short)dtNezavrseniProjekti.Rows[index]["ID"];
+
+            var query =
+                from radnik in dsEvidencija.Radnik.AsEnumerable()
+                let id = radnik.Field<short>("RadnikID")
+                where id == sifra
+                select new
+                {
+                    Sifra = id,
+                    ImePrezime = radnik.Field<string>("Ime") + " " + radnik.Field<string>("Prezime")
+                };
+
+            dtRadnici.Clear();
+            foreach (var result in query)
+            {
+                DataRow row = dtRadnici.Rows.Add();
+                row.SetField("ID", result.Sifra);
+                row.SetField("ImePrezime", result.ImePrezime);
+            }
+        }
+
+        private void gridViewProjekti_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+    }
+}
+
+
+
