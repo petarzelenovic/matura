@@ -1,0 +1,1102 @@
+-------------------------------------------------FORMA 2------------------------------------------------------------------
+namespace EIT_B27_Segota_Filip
+{
+    public partial class Roditelji : Form
+    {
+        OleDbConnection con;
+
+        public Roditelji()
+        {
+            InitializeComponent();
+
+            string putanja = Environment.CurrentDirectory;
+            string[] putanjaBaze = putanja.Split(new string[] { "bin" }, StringSplitOptions.None);
+            AppDomain.CurrentDomain.SetData("DataDirectory", putanjaBaze[0]);
+
+            con = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=|DataDirectory|\Dnevni boravak dece.accdb");
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            Graphics g = pictureBox1.CreateGraphics();
+            Pen olovka = new Pen(Color.Green);
+            g.DrawRectangle(olovka, pictureBox1.Width / 4, pictureBox1.Height / 4, pictureBox1.Width / 2, pictureBox1.Height / 2);
+            olovka.Color = Color.Blue;
+            g.DrawEllipse(olovka, 3 * pictureBox1.Width / 8, 0, pictureBox1.Width / 4, pictureBox1.Height / 4);
+            olovka.Color = Color.Red;
+            g.DrawLine(olovka, 3 * pictureBox1.Width / 8, 3 * pictureBox1.Height / 4, 3 * pictureBox1.Width / 8, pictureBox1.Height);
+            g.DrawLine(olovka, pictureBox1.Width - 3 * pictureBox1.Width / 8, 3 * pictureBox1.Height / 4, pictureBox1.Width - 3 * pictureBox1.Width / 8, pictureBox1.Height);
+            g.DrawLine(olovka, pictureBox1.Width / 4, pictureBox1.Height / 4, 0, pictureBox1.Height / 2);
+            g.DrawLine(olovka, 3 * pictureBox1.Width / 4, pictureBox1.Height / 4, pictureBox1.Width, 0);
+            olovka.Dispose();
+            g.Dispose();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            textBox1.Text = "";
+            textBox2.Text = "";
+            textBox3.Text = "";
+            textBox4.Text = "";
+            maskedTextBox1.Text = "";
+            maskedTextBox2.Text = "";
+            radioButton1.Checked = false;
+            radioButton2.Checked = false;
+            radioButton3.Checked = false;
+
+            con.Open();
+            OleDbCommand cmd = new OleDbCommand("select RoditeljiID from Roditelji order by RoditeljiID", con);
+            OleDbDataReader reader = cmd.ExecuteReader();
+            int i = new int();
+            bool upisan = false;
+            while (reader.Read())
+            {
+                int j = new int();
+                int.TryParse(reader[0].ToString(), out j);
+                if (i == j - 1)
+                {
+                    int.TryParse(reader[0].ToString(), out i);
+                }
+                else
+                {
+                    i += 1;
+                    textBox1.Text = i.ToString();
+                    upisan = true;
+                    break;
+                }
+            }
+            if (!upisan)
+            {
+                i += 1;
+                textBox1.Text = i.ToString();
+            }
+            reader.Close();
+
+            cmd = new OleDbCommand("select RoditeljiID from Roditelji order by RoditeljiID DESC", con);
+            reader = cmd.ExecuteReader();
+            reader.Read();
+            int x = new int();
+            int y = new int();
+            int.TryParse(textBox1.Text, out x);
+            int.TryParse(reader[0].ToString(), out y);
+            if (x > y)
+            {
+                button4.Enabled = false;
+            }
+            else
+            {
+                button4.Enabled = true;
+            }
+            reader.Close();
+
+
+            cmd = new OleDbCommand("select RoditeljiID from Roditelji order by RoditeljiID", con);
+            reader = cmd.ExecuteReader();
+            reader.Read();
+            int x2 = new int();
+            int y2 = new int();
+            int.TryParse(textBox1.Text, out x2);
+            int.TryParse(reader[0].ToString(), out y2);
+            if (x2 < y2)
+            {
+                button3.Enabled = false;
+            }
+            else
+            {
+                button3.Enabled = true;
+            }
+
+            reader.Close();
+            reader.Dispose();
+            cmd.Dispose();
+            con.Close();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            con.Open();
+            OleDbCommand cmd = new OleDbCommand();
+            OleDbDataReader reader;
+
+            if (textBox1.Text == "")
+            {
+                cmd = new OleDbCommand("select * from Roditelji order by RoditeljiID", con);
+                reader = cmd.ExecuteReader();
+                reader.Read();
+                textBox1.Text = reader[0].ToString();
+                textBox2.Text = reader[2].ToString();
+                textBox3.Text = reader[3].ToString();
+                textBox4.Text = reader[4].ToString();
+                maskedTextBox1.Text = reader[5].ToString();
+                maskedTextBox2.Text = reader[6].ToString();
+                if (reader[1].ToString() == "1")
+                {
+                    radioButton1.Checked = true;
+                }
+                else if (reader[1].ToString() == "2")
+                {
+                    radioButton2.Checked = true;
+                }
+                else
+                {
+                    radioButton3.Checked = true;
+                }
+                reader.Close();
+            }
+            else
+            {
+                cmd = new OleDbCommand("select * from Roditelji order by RoditeljiID", con);
+                reader = cmd.ExecuteReader();
+                bool upisi = false;
+                while (reader.Read())
+                {
+                    if (upisi)
+                    {
+                        textBox1.Text = reader[0].ToString();
+                        textBox2.Text = reader[2].ToString();
+                        textBox3.Text = reader[3].ToString();
+                        textBox4.Text = reader[4].ToString();
+                        maskedTextBox1.Text = reader[5].ToString();
+                        maskedTextBox2.Text = reader[6].ToString();
+                        if (reader[1].ToString() == "1")
+                        {
+                            radioButton1.Checked = true;
+                        }
+                        else if (reader[1].ToString() == "2")
+                        {
+                            radioButton2.Checked = true;
+                        }
+                        else
+                        {
+                            radioButton3.Checked = true;
+                        }
+                        break;
+                    }
+                    else if (reader[0].ToString() == textBox1.Text)
+                    {
+                        upisi = true;
+                    }
+                }
+                reader.Close();
+
+                if (!upisi)
+                {
+                    int i = new int();
+                    int.TryParse(textBox1.Text, out i);
+                    while (true)
+                    {
+                        cmd = new OleDbCommand("select * from Roditelji where RoditeljiID = @id order by RoditeljiID", con);
+                        i++;
+                        cmd.Parameters.AddWithValue("@id", i);
+                        reader = cmd.ExecuteReader();
+                        bool upisan = false;
+                        while (reader.Read())
+                        {
+                            upisan = true;
+                            textBox1.Text = reader[0].ToString();
+                            textBox2.Text = reader[2].ToString();
+                            textBox3.Text = reader[3].ToString();
+                            textBox4.Text = reader[4].ToString();
+                            maskedTextBox1.Text = reader[5].ToString();
+                            maskedTextBox2.Text = reader[6].ToString();
+                            if (reader[1].ToString() == "1")
+                            {
+                                radioButton1.Checked = true;
+                            }
+                            else if (reader[1].ToString() == "2")
+                            {
+                                radioButton2.Checked = true;
+                            }
+                            else
+                            {
+                                radioButton3.Checked = true;
+                            }
+                            break;
+                        }
+                        if (upisan)
+                        {
+                            break;
+                        }
+                    }  
+                }
+
+                reader.Close();
+            }
+
+                cmd = new OleDbCommand("select RoditeljiID from Roditelji order by RoditeljiID", con);
+                reader = cmd.ExecuteReader();
+                reader.Read();
+                if (reader[0].ToString() == textBox1.Text)
+                {
+                    button3.Enabled = false;
+                }
+                else
+                {
+                    button3.Enabled = true;
+                }
+                reader.Close();
+
+                bool poslednji = false;
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    if (reader[0].ToString() == textBox1.Text)
+                    {
+                        poslednji = true;
+                    }
+                    else
+                    {
+                        poslednji = false;
+                    }
+                }
+                reader.Close();
+                if (poslednji)
+                {
+                    button4.Enabled = false;
+                }
+                else
+                {
+                    button4.Enabled = true;
+                }
+
+            reader.Dispose();
+            cmd.Dispose();
+            con.Close();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            con.Open();
+            OleDbCommand cmd = new OleDbCommand();
+            OleDbDataReader reader;
+
+            if (textBox1.Text == "")
+            {
+                button3.Enabled = false;
+            }
+            else
+            {
+                cmd = new OleDbCommand("select * from Roditelji order by RoditeljiID DESC", con);
+                reader = cmd.ExecuteReader();
+                bool upisi = false;
+                while (reader.Read())
+                {
+                    if (upisi)
+                    {
+                        textBox1.Text = reader[0].ToString();
+                        textBox2.Text = reader[2].ToString();
+                        textBox3.Text = reader[3].ToString();
+                        textBox4.Text = reader[4].ToString();
+                        maskedTextBox1.Text = reader[5].ToString();
+                        maskedTextBox2.Text = reader[6].ToString();
+                        if (reader[1].ToString() == "1")
+                        {
+                            radioButton1.Checked = true;
+                        }
+                        else if (reader[1].ToString() == "2")
+                        {
+                            radioButton2.Checked = true;
+                        }
+                        else
+                        {
+                            radioButton3.Checked = true;
+                        }
+                        break;
+                    }
+                    else if (reader[0].ToString() == textBox1.Text)
+                    {
+                        upisi = true;
+                    }
+                }
+                reader.Close();
+
+                if (!upisi)
+                {
+                    int i = new int();
+                    int.TryParse(textBox1.Text, out i);
+                    while (true)
+                    {
+                        cmd = new OleDbCommand("select * from Roditelji where RoditeljiID = @id order by RoditeljiID DESC", con);
+                        i--;
+                        cmd.Parameters.AddWithValue("@id", i);
+                        reader = cmd.ExecuteReader();
+                        bool upisan = false;
+                        while (reader.Read())
+                        {
+                            upisan = true;
+                            textBox1.Text = reader[0].ToString();
+                            textBox2.Text = reader[2].ToString();
+                            textBox3.Text = reader[3].ToString();
+                            textBox4.Text = reader[4].ToString();
+                            maskedTextBox1.Text = reader[5].ToString();
+                            maskedTextBox2.Text = reader[6].ToString();
+                            if (reader[1].ToString() == "1")
+                            {
+                                radioButton1.Checked = true;
+                            }
+                            else if (reader[1].ToString() == "2")
+                            {
+                                radioButton2.Checked = true;
+                            }
+                            else
+                            {
+                                radioButton3.Checked = true;
+                            }
+                            break;
+                        }
+                        if (upisan)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                reader.Close();
+            }
+
+                cmd = new OleDbCommand("select RoditeljiID from Roditelji order by RoditeljiID DESC", con);
+                reader = cmd.ExecuteReader();
+                reader.Read();
+                if (reader[0].ToString() == textBox1.Text)
+                {
+                    button4.Enabled = false;
+                }
+                else
+                {
+                    button4.Enabled = true;
+                }
+                reader.Close();
+
+                bool prvi = false;
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    if (reader[0].ToString() == textBox1.Text)
+                    {
+                        prvi = true;
+                    }
+                    else
+                    {
+                        prvi = false;
+                    }
+                }
+                reader.Close();
+                if (prvi)
+                {
+                    button3.Enabled = false;
+                }
+                else
+                {
+                    button3.Enabled = true;
+                }
+
+            reader.Dispose();
+            cmd.Dispose();
+            con.Close();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            int i = new int();
+            int.TryParse(textBox1.Text, out i);
+            OleDbCommand cmd = new OleDbCommand("select RoditeljiID from Roditelji where RoditeljiID = @id", con);
+            cmd.Parameters.AddWithValue("@id", i);
+            con.Open();
+            OleDbDataReader reader = cmd.ExecuteReader();
+
+            bool postoji = false;
+            while (reader.Read())
+            {
+                postoji = true;
+            }
+            reader.Close();
+            reader.Dispose();
+
+            if (!postoji)
+            {
+                string fik = maskedTextBox1.Text;
+                fik = fik.Replace("/", "");
+                fik = fik.Replace("-", "");
+                fik = fik.Replace(" ", "");
+
+                string mob = maskedTextBox2.Text;
+                mob = mob.Replace("(", "");
+                mob = mob.Replace("-", "");
+                mob = mob.Replace(")", "");
+                mob = mob.Replace(" ", "");
+
+                if(textBox1.Text == ""){
+                    MessageBox.Show("Mora biti uneta sifra!\n Za unos sifre prilikom unosa novog roditelja, kliknite dugme 'Novi'.", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else if (textBox2.Text == "" || textBox3.Text == "" || textBox4.Text == "" || fik == "" || mob == "")
+                {
+                    MessageBox.Show("Niste uneli potrebne podatke!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else if (radioButton1.Checked == false && radioButton2.Checked == false && radioButton3.Checked == false)
+                {
+                    MessageBox.Show("Niste izabrali svojstvo roditelja!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else if (fik.Count() < 9 || fik.Count() > 10 || mob.Count() > 10 || mob.Count() < 9)
+                {
+                    MessageBox.Show("Nepravilan unos broja!\nFiksni broj mora da ima 6 cifare.\nMobilni broj mora da ima 9 ili 10 cifara.", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    cmd = new OleDbCommand("insert into Roditelji values(@id, @svojstvo, @ime, @prezime, @adresa, @fiksni, @mobilni)", con);
+                    int id = new int();
+                    int.TryParse(textBox1.Text, out id);
+                    cmd.Parameters.AddWithValue("@id", id);
+                    if (radioButton1.Checked == true)
+                    {
+                        cmd.Parameters.AddWithValue("@svojstvo", 1);
+                    }
+                    else if (radioButton2.Checked == true)
+                    {
+                        cmd.Parameters.AddWithValue("@svojstvo", 2);
+                    }
+                    else if (radioButton3.Checked == true)
+                    {
+                        cmd.Parameters.AddWithValue("@svojstvo", 3);
+                    }
+                    cmd.Parameters.AddWithValue("@ime", textBox2.Text);
+                    cmd.Parameters.AddWithValue("@prezime", textBox3.Text);
+                    cmd.Parameters.AddWithValue("@adresa", textBox4.Text);
+                    cmd.Parameters.AddWithValue("@fiksni", maskedTextBox1.Text);
+                    cmd.Parameters.AddWithValue("@mobilni", maskedTextBox2.Text);
+
+
+                    OleDbDataAdapter adapter = new OleDbDataAdapter();
+                    adapter.InsertCommand = cmd;
+                    adapter.InsertCommand.ExecuteNonQuery();
+                    MessageBox.Show("Uspesno su upisani podaci o roditelju!", textBox1.Text + ". " + textBox2.Text + " " + textBox3.Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    adapter.Dispose();
+                }
+            }
+            else
+            {
+                string fik = maskedTextBox1.Text;
+                fik = fik.Replace("/", "");
+                fik = fik.Replace("-", "");
+                fik = fik.Replace(" ", "");
+
+                string mob = maskedTextBox2.Text;
+                mob = mob.Replace("(", "");
+                mob = mob.Replace("-", "");
+                mob = mob.Replace(")", "");
+                mob = mob.Replace(" ", "");
+
+                if (textBox1.Text == "")
+                {
+                    MessageBox.Show("Mora biti uneta sifra!\n Za unos sifre prilikom unosa novog roditelja, kliknite dugme 'Novi'.", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else if (textBox2.Text == "" || textBox3.Text == "" || textBox4.Text == "" || fik == "" || mob == "")
+                {
+                    MessageBox.Show("Niste uneli potrebne podatke!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else if (radioButton1.Checked == false && radioButton2.Checked == false && radioButton3.Checked == false)
+                {
+                    MessageBox.Show("Niste izabrali svojstvo roditelja!", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else if (fik.Count() < 9 || fik.Count() > 10 || mob.Count() > 10 || mob.Count() < 9)
+                {
+                    MessageBox.Show("Nepravilan unos broja!\nFiksni broj mora da ima 6 cifare.\nMobilni broj mora da ima 9 ili 10 cifara.", "Greska!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    cmd = new OleDbCommand("update Roditelji set SvojstvoID = @svojstvo, Ime = @ime, Prezime = @prezime, Adresa = @adresa, Fiksni = @fiksni, Mobilni = @mobilni where RoditeljiID = @id", con);
+                    int id = new int();
+                    int.TryParse(textBox1.Text, out id);
+                    if (radioButton1.Checked == true)
+                    {
+                        cmd.Parameters.AddWithValue("@svojstvo", 1);
+                    }
+                    else if (radioButton2.Checked == true)
+                    {
+                        cmd.Parameters.AddWithValue("@svojstvo", 2);
+                    }
+                    else if (radioButton3.Checked == true)
+                    {
+                        cmd.Parameters.AddWithValue("@svojstvo", 3);
+                    }
+                    cmd.Parameters.AddWithValue("@ime", textBox2.Text);
+                    cmd.Parameters.AddWithValue("@prezime", textBox3.Text);
+                    cmd.Parameters.AddWithValue("@adresa", textBox4.Text);
+                    cmd.Parameters.AddWithValue("@fiksni", maskedTextBox1.Text);
+                    cmd.Parameters.AddWithValue("@mobilni", maskedTextBox2.Text);
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    OleDbDataAdapter adapter = new OleDbDataAdapter();
+                    adapter.UpdateCommand = cmd;
+                    adapter.UpdateCommand.ExecuteNonQuery();
+                    MessageBox.Show("Uspesno su azurirani podaci o roditelj!", textBox1.Text + ". " + textBox2.Text + " " + textBox3.Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    adapter.Dispose();
+                }
+            }
+            cmd.Dispose();
+            con.Close();
+        }
+
+        private void Roditelji_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------FORMA 3---------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+
+
+namespace EIT_B27_Segota_Filip
+{
+    public partial class BrojDece : Form
+    {
+        OleDbConnection con;
+        public BrojDece()
+        {
+            InitializeComponent();
+
+            string putanja = Environment.CurrentDirectory;
+            string[] putanjaBaze = putanja.Split(new string[] { "bin" }, StringSplitOptions.None);
+            AppDomain.CurrentDomain.SetData("DataDirectory", putanjaBaze[0]);
+
+            con = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=|DataDirectory|\Dnevni boravak dece.accdb");
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Rows.Clear();
+            con.Open();
+            OleDbCommand cmd = new OleDbCommand();
+            int brojdece = new int();
+            int.TryParse(numericUpDown1.Value.ToString(), out brojdece);
+
+            //true false false
+            if (checkBox1.Checked == true && checkBox2.Checked == false && checkBox3.Checked == false)
+            {
+                if (checkBox4.Checked == true && checkBox5.Checked == false)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " + 
+                                                        "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                        "where Roditelji.SvojstvoID = @svojstvo and Dete.PolID = @pol", con);
+
+                    cmd.Parameters.AddWithValue("@pol", 1);
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 2);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+                else if (checkBox4.Checked == true && checkBox5.Checked == true)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from (((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "where Roditelji.SvojstvoID = @svojstvo", con);
+
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 2);
+
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+                if (checkBox4.Checked == false && checkBox5.Checked == true)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                        "where Roditelji.SvojstvoID = @svojstvo and Dete.PolID = @pol", con);
+
+                    cmd.Parameters.AddWithValue("@pol", 2);
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 2);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+            }
+
+            //true true false
+            else if (checkBox1.Checked == true && checkBox2.Checked == true && checkBox3.Checked == false)
+            {
+                if (checkBox4.Checked == true && checkBox5.Checked == false)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                        "where (Roditelji.SvojstvoID = @svojstvo or Roditelji.SvojstvoID = @svojstvo2) and Dete.PolID = @pol", con);
+
+                    cmd.Parameters.AddWithValue("@pol", 1);
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 2);
+                    cmd.Parameters.AddWithValue("@svojstvo2", 1);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+                if (checkBox4.Checked == true && checkBox5.Checked == true)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from (((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "where (Roditelji.SvojstvoID = @svojstvo or Roditelji.SvojstvoID = @svojstvo2)", con);
+
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 2);
+                    cmd.Parameters.AddWithValue("@svojstvo2", 1);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+            }
+            if (checkBox4.Checked == false && checkBox5.Checked == true)
+            {
+                cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                    "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                    "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                    "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                    "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                    "where (Roditelji.SvojstvoID = @svojstvo or Roditelji.SvojstvoID = @svojstvo2) and Dete.PolID = @pol", con);
+
+                cmd.Parameters.AddWithValue("@pol", 2);
+                cmd.Parameters.AddWithValue("@broj", brojdece);
+                cmd.Parameters.AddWithValue("@svojstvo", 2);
+                cmd.Parameters.AddWithValue("@svojstvo2", 1);
+
+                OleDbDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                }
+                reader.Close();
+                reader.Dispose();
+            }
+            //true true true
+            else if (checkBox1.Checked == true && checkBox2.Checked == true && checkBox3.Checked == true)
+            {
+                if (checkBox4.Checked == true && checkBox5.Checked == false)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                        "where Dete.PolID = @pol", con);
+
+                    cmd.Parameters.AddWithValue("@pol", 1);
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+                if (checkBox4.Checked == true && checkBox5.Checked == true)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from (((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "", con);
+
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+            }
+            if (checkBox4.Checked == false && checkBox5.Checked == true)
+            {
+                cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                    "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                    "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                    "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                    "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                    "where Dete.PolID = @pol", con);
+
+                cmd.Parameters.AddWithValue("@pol", 2);
+                cmd.Parameters.AddWithValue("@broj", brojdece);
+
+                OleDbDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                }
+                reader.Close();
+                reader.Dispose();
+            }
+
+            //true false true
+            else if (checkBox1.Checked == true && checkBox2.Checked == false && checkBox3.Checked == true)
+            {
+                if (checkBox4.Checked == true && checkBox5.Checked == false)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                        "where (Roditelji.SvojstvoID = @svojstvo or Roditelji.SvojstvoID = @svojstvo2) and Dete.PolID = @pol", con);
+
+                    cmd.Parameters.AddWithValue("@pol", 1);
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 2);
+                    cmd.Parameters.AddWithValue("@svojstvo2", 3);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+                if (checkBox4.Checked == true && checkBox5.Checked == true)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from (((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "where (Roditelji.SvojstvoID = @svojstvo or Roditelji.SvojstvoID = @svojstvo2)", con);
+
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 2);
+                    cmd.Parameters.AddWithValue("@svojstvo2", 3);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+            }
+            if (checkBox4.Checked == false && checkBox5.Checked == true)
+            {
+                cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                    "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                    "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                    "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                    "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                    "where (Roditelji.SvojstvoID = @svojstvo or Roditelji.SvojstvoID = @svojstvo2) and Dete.PolID = @pol", con);
+
+                cmd.Parameters.AddWithValue("@pol", 2);
+                cmd.Parameters.AddWithValue("@broj", brojdece);
+                cmd.Parameters.AddWithValue("@svojstvo", 2);
+                cmd.Parameters.AddWithValue("@svojstvo2", 3);
+
+                OleDbDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                }
+                reader.Close();
+                reader.Dispose();
+            }
+            //false true false
+            else if (checkBox1.Checked == false && checkBox2.Checked == true && checkBox3.Checked == false)
+            {
+                if (checkBox4.Checked == true && checkBox5.Checked == false)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                        "where Roditelji.SvojstvoID = @svojstvo and Dete.PolID = @pol", con);
+
+                    cmd.Parameters.AddWithValue("@pol", 1);
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 1);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+                else if (checkBox4.Checked == true && checkBox5.Checked == true)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from (((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "where Roditelji.SvojstvoID = @svojstvo", con);
+
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 1);
+
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+                if (checkBox4.Checked == false && checkBox5.Checked == true)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                        "where Roditelji.SvojstvoID = @svojstvo and Dete.PolID = @pol", con);
+
+                    cmd.Parameters.AddWithValue("@pol", 2);
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 1);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+            }
+            //false true true
+            else if (checkBox1.Checked == false && checkBox2.Checked == true && checkBox3.Checked == true)
+            {
+                if (checkBox4.Checked == true && checkBox5.Checked == false)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                        "where (Roditelji.SvojstvoID = @svojstvo or Roditelji.SvojstvoID = @svojstvo2) and Dete.PolID = @pol", con);
+
+                    cmd.Parameters.AddWithValue("@pol", 1);
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 1);
+                    cmd.Parameters.AddWithValue("@svojstvo2", 3);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+                if (checkBox4.Checked == true && checkBox5.Checked == true)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from (((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "where (Roditelji.SvojstvoID = @svojstvo or Roditelji.SvojstvoID = @svojstvo2)", con);
+
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 1);
+                    cmd.Parameters.AddWithValue("@svojstvo2", 3);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+            }
+            if (checkBox4.Checked == false && checkBox5.Checked == true)
+            {
+                cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                    "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                    "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                    "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                    "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                    "where (Roditelji.SvojstvoID = @svojstvo or Roditelji.SvojstvoID = @svojstvo2) and Dete.PolID = @pol", con);
+
+                cmd.Parameters.AddWithValue("@pol", 2);
+                cmd.Parameters.AddWithValue("@broj", brojdece);
+                cmd.Parameters.AddWithValue("@svojstvo", 1);
+                cmd.Parameters.AddWithValue("@svojstvo2", 3);
+
+                OleDbDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                }
+                reader.Close();
+                reader.Dispose();
+            }
+            //false false true
+            else if (checkBox1.Checked == false && checkBox2.Checked == false && checkBox3.Checked == true)
+            {
+                if (checkBox4.Checked == true && checkBox5.Checked == false)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                        "where Roditelji.SvojstvoID = @svojstvo and Dete.PolID = @pol", con);
+
+                    cmd.Parameters.AddWithValue("@pol", 1);
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 3);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+                else if (checkBox4.Checked == true && checkBox5.Checked == true)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from (((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "where Roditelji.SvojstvoID = @svojstvo", con);
+
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 3);
+
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+                if (checkBox4.Checked == false && checkBox5.Checked == true)
+                {
+                    cmd = new OleDbCommand("select distinct Roditelji.Ime, Roditelji.Prezime, Roditelji.Adresa, Svojstvo_Roditelja.Svojstvo " +
+                                                        "from ((((Roditelji inner join Svojstvo_Roditelja on Roditelji.SvojstvoID = Svojstvo_Roditelja.SvojstvoID) " +
+                                                        "inner join Dete on Roditelji.RoditeljiID = Dete.RoditeljiID) " +
+                                                        "inner join (select RoditeljiID as id from Dete where PolID = @pol group by RoditeljiID having count(*) = @broj) subq on Roditelji.RoditeljiID = subq.id) " +
+                                                        "inner join (select RoditeljiID as id from Dete group by RoditeljiID having count(*) = @broj) subq2 on Roditelji.RoditeljiID = subq2.id) " +
+                                                        "where Roditelji.SvojstvoID = @svojstvo and Dete.PolID = @pol", con);
+
+                    cmd.Parameters.AddWithValue("@pol", 2);
+                    cmd.Parameters.AddWithValue("@broj", brojdece);
+                    cmd.Parameters.AddWithValue("@svojstvo", 3);
+
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        dataGridView1.Rows.Add(reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
+                    }
+                    reader.Close();
+                    reader.Dispose();
+                }
+            }
+
+            cmd.Dispose();
+            con.Close();
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void groupBox2_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
