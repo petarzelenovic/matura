@@ -102,7 +102,7 @@ Beleske varchar(40),
 PRIMARY KEY(AktivnostID,DeteID,Datum));
 
 ALTER TABLE Registar_Aktivnosti ADD CONSTRAINT AktivnostID_FK FOREIGN KEY (AktivnostID) REFERENCES Aktivnosti(AktivnostID);
-ALTER TABLE Registar_Aktivnosti ADD CONSTRAINT DeteID_FK FOREIGN KEY (DetetID) REFERENCES Dete(DeteID);
+ALTER TABLE Registar_Aktivnosti ADD CONSTRAINT DeteID_FK FOREIGN KEY (DeteID) REFERENCES Dete(DeteID);
 
 
 
