@@ -53,7 +53,7 @@ PRIMARY KEY(KancelarijaID));
 
 b. Dodavanje KancelarijaID u tabelu radnik
 ALTER TABLE RADNIK ADD KancelarijaID INT;
-ALTER TABLE RADNIKmADD CONSTRAINT fk_KancelarijaID FOREIGN KEY (KancelarijaID) REFERENCES KANCELARIJA(BrojKancelarije);
+ALTER TABLE RADNIKmADD CONSTRAINT fk_KancelarijaID FOREIGN KEY (KancelarijaID) REFERENCES KANCELARIJA(KancelarijaID);
 
 c. Kreiranje tabele Sektor
 CREATE TABLE SEKTOR(
