@@ -1,0 +1,224 @@
+-------------------------------------------------------FORMA 2 RADJENO SA GRID VIEWOM-------------------------------------------
+
+namespace B15_Biblioteka
+{
+    public partial class frmKnjigeUnos : Form
+    {
+        public frmKnjigeUnos()
+        {
+            InitializeComponent();
+        }
+
+        private void FrmKnjigeUnos_Load(object sender, EventArgs e)
+        {
+            // TODO: This line of code loads data into the 'skolskaBibliotekaDataSet.Knjiga' table. You can move, or remove it, as needed.
+            this.knjigaTableAdapter.Fill(this.skolskaBibliotekaDataSet.Knjiga);
+        }
+
+        private void BtnIzadji_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void BtnUpisi_Click(object sender, EventArgs e)
+        {
+            short sifra;
+            if (!short.TryParse(txtSifra.Text, out sifra) || sifra < 0)
+            {
+                Util.Error("Neodgovarajuca sifra.");
+                txtSifra.Focus();
+                txtSifra.SelectAll();
+                return;
+            }
+
+            SkolskaBibliotekaDataSet.KnjigaRow knjiga1 = skolskaBibliotekaDataSet.Knjiga.FindByKnjigaID(sifra);
+            
+            if (knjiga1 != null)
+            {
+                // var b = knjiga1.UDK;
+                txtUDK.Text = knjiga1.IsUDKNull() ? "" : knjiga1.UDK;
+                txtISBN.Text = knjiga1.IsISBNNull() ? "" : knjiga1.ISBN;
+                txtNaziv.Text = knjiga1.IsNazivNull() ? "" : knjiga1.Naziv;
+                return;
+            }
+
+            try
+            {
+                SkolskaBibliotekaDataSet.KnjigaRow knjiga = skolskaBibliotekaDataSet.Knjiga.NewKnjigaRow();
+                knjiga.KnjigaID = sifra;
+                knjiga.UDK = txtUDK.Text;
+                knjiga.ISBN = txtISBN.Text;
+                knjiga.Naziv = txtNaziv.Text;
+
+                skolskaBibliotekaDataSet.Knjiga.AddKnjigaRow(knjiga);
+                knjigaTableAdapter.Update(skolskaBibliotekaDataSet.Knjiga);
+                Util.Info("Uspesno sacuvano u bazu.");
+            }
+            catch (OleDbException ex)
+            {
+                Util.Error("Doslo je do greske pri komuniciranju sa bazom.");
+                skolskaBibliotekaDataSet.RejectChanges();
+            }
+            catch (Exception)
+            {
+                Util.Error("Doslo je do greske.");
+            }
+        }
+
+        private void BtnObrisi_Click(object sender, EventArgs e)
+        {
+            short sifra = short.Parse(txtSifra.Text);
+
+            SkolskaBibliotekaDataSet.KnjigaRow knjiga = skolskaBibliotekaDataSet.Knjiga.FindByKnjigaID(sifra);
+            if (knjiga == null)
+            {
+                Util.Error("Trazena knjiga ne postoji.");
+                return;
+            }
+
+            foreach (var row in knjiga.GetNapisaliRows())
+                row.Delete();
+
+            try
+            {
+                knjiga.Delete();
+                knjigaTableAdapter.Update(skolskaBibliotekaDataSet.Knjiga);
+                Util.Info("Knjiga je uspesno obrisana.");
+            }
+            catch (OleDbException ex)
+            {
+                Util.Error("Doslo je do greske pri komuniciranju sa bazom.");
+                skolskaBibliotekaDataSet.RejectChanges();
+                throw ex;
+            }
+            catch (Exception)
+            {
+                Util.Error("Doslo je do greske.");
+            }
+        }
+
+        private void BtnIzmeni_Click(object sender, EventArgs e)
+        {
+            short sifra = short.Parse(txtSifra.Text);
+
+            SkolskaBibliotekaDataSet.KnjigaRow knjiga = skolskaBibliotekaDataSet.Knjiga.FindByKnjigaID(sifra);
+            if (knjiga == null)
+            {
+                Util.Error("Trazena knjiga ne postoji u bazi.");
+                return;
+            }
+
+            try
+            {
+                knjiga.BeginEdit();
+                knjiga.UDK = txtUDK.Text;
+                knjiga.ISBN = txtISBN.Text;
+                knjiga.Naziv = txtNaziv.Text;
+                knjiga.EndEdit();
+                knjigaTableAdapter.Update(knjiga);
+                Util.Info("Promene su uspesno sacuvane.");
+            }
+            catch (OleDbException)
+            {
+                Util.Error("Doslo je do greske pri komuniciranju sa bazom.");
+                skolskaBibliotekaDataSet.RejectChanges();
+            }
+            catch (Exception)
+            {
+                Util.Error("Doslo je do greske.");
+            }
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+    }
+}
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------FORMA 3 CHART DODATI-----------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------
+namespace B15_Biblioteka
+{
+    using DsBiblioteka = SkolskaBibliotekaDataSet;
+
+    public partial class frmAnalizaPoKnjigama : Form
+    {
+        public frmAnalizaPoKnjigama()
+        {
+            InitializeComponent();
+        }
+
+        private void AnalizaPoKnjigama_Load(object sender, EventArgs e)
+        {
+            // TODO: This line of code loads data into the 'skolskaBibliotekaDataSet.Knjiga' table. You can move, or remove it, as needed.
+            this.knjigaTableAdapter.Fill(this.skolskaBibliotekaDataSet.Knjiga);
+            this.na_citanjuTableAdapter.Fill(this.skolskaBibliotekaDataSet.Na_citanju);
+        }
+
+        private void ComboBox1_Format(object sender, ListControlConvertEventArgs e)
+        {
+            DsBiblioteka.KnjigaRow knjiga = (DsBiblioteka.KnjigaRow) ((DataRowView)e.ListItem).Row;
+            e.Value = string.Format("{0} - {1}", knjiga.KnjigaID, knjiga.Naziv);
+        }
+
+        private void BtnPrikazi_Click(object sender, EventArgs e)
+        {
+            int godina;
+
+            if (!int.TryParse(txtGodina.Text, out godina) || godina <= 0)
+            {
+                Util.Error("Nepravilna godina.");
+                txtGodina.Focus();
+                txtGodina.SelectAll();
+                return;
+            }
+            short knjigaID = (short) comboKnjiga.SelectedValue;
+
+            int[] months =
+                (from knjiga in skolskaBibliotekaDataSet.Knjiga.AsEnumerable()
+                 join naCitanju in skolskaBibliotekaDataSet.Na_citanju.AsEnumerable()
+                 on knjiga.Field<short>("KnjigaID") equals naCitanju.Field<short>("KnjigaID")
+                 where knjiga.Field<short>("KnjigaID") == knjigaID
+                 && naCitanju.Field<DateTime>("DatUz").Year == (godina - 1)
+                 select naCitanju.Field<DateTime>("DatUz").Month - 1).ToArray();
+
+            int[] histogram = new int[12];
+            foreach (int month in months)
+            {
+                histogram[month]++;
+            }
+            string[] monthNames = new string[] { "Januar", "Februar", "Mart", "April", "Maj", "Jun", "Jul", "Avgust", "Septembar", "Oktobar", "Novembar", "Decembar" };
+
+            chart1.Series[0].Points.Clear();
+            for (int i = 0; i < histogram.Length; i++)
+            {
+                chart1.Series[0].Points.AddXY(monthNames[i], histogram[i]);
+            }
+            
+        }
+
+        private void BtnIzadji_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
