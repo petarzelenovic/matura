@@ -119,12 +119,12 @@ Opis varchar(50),
 UdaljenostRupe number,
 UdaracaPoRupi int,
 CONSTRAINT TerenID_FK FOREIGN KEY (TerenID) REFERENCES Teren(TerenID),
-PRIMARY KEY (RupaID,TerenID));
+PRIMARY KEY (RupaID));
 
 c. Rezultat
 CREATE TABLE Rezultat(
 Rbr int,
-PartijaID
+PartijaID int,
 RupaID int,
 Skor int,
 PRIMARY KEY (Rbr,PartijaID,RupaID));
