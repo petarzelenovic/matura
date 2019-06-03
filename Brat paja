@@ -1,0 +1,380 @@
+1 
+ 
+﻿using System;
+ 2 
+ 
+using System.Collections.Generic;
+ 3 
+ 
+using System.ComponentModel;
+ 4 
+ 
+using System.Data;
+ 5 
+ 
+using System.Drawing;
+ 6 
+ 
+using System.Linq;
+ 7 
+ 
+using System.Text;
+ 8 
+ 
+using System.Threading.Tasks;
+ 9 
+ 
+using System.Windows.Forms;
+ 10 
+ 
+using System.Drawing;
+ 11 
+ 
+using System.Data.OleDb;
+ 12 
+ 
+ 13 
+ 
+namespace KecojevicB28
+ 14 
+ 
+{
+ 15 
+ 
+    public partial class Deca : Form
+ 16 
+ 
+    {
+ 17 
+ 
+        private OleDbConnection connection = new OleDbConnection();
+ 18 
+ 
+ 19 
+ 
+        public Deca()
+ 20 
+ 
+        {
+ 21 
+ 
+            InitializeComponent();
+ 22 
+ 
+            connection.ConnectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=KecojevicB28Baza.accdb";
+ 23 
+ 
+        }
+ 24 
+ 
+ 25 
+ 
+        private void button6_Click(object sender, EventArgs e)
+ 26 
+ 
+        {
+ 27 
+ 
+            this.Close();
+ 28 
+ 
+        }
+ 29 
+ 
+ 30 
+ 
+        private void Deca_Load(object sender, EventArgs e)
+ 31 
+ 
+        {
+ 32 
+ 
+            try
+ 33 
+ 
+            {
+ 34 
+ 
+                connection.Open();
+ 35 
+ 
+                OleDbCommand command = new OleDbCommand();
+ 36 
+ 
+                command.Connection = connection;
+ 37 
+ 
+ 38 
+ 
+                string queryR = "SELECT * FROM Roditelji";
+ 39 
+ 
+ 40 
+ 
+                command.CommandText = queryR;
+ 41 
+ 
+                OleDbDataReader reader = command.ExecuteReader();
+ 42 
+ 
+                while (reader.Read())
+ 43 
+ 
+                {
+ 44 
+ 
+                    String display = reader["Ime"].ToString() + " - " + reader["Prezime"].ToString();
+ 45 
+ 
+                    String hidden = reader["RoditeljiID"].ToString();
+ 46 
+ 
+                    comboBox1.Items.Add(new ComboBoxItem(display, hidden));
+ 47 
+ 
+                }
+ 48 
+ 
+                reader.Close();
+ 49 
+ 
+ 50 
+ 
+                connection.Close();
+ 51 
+ 
+            }
+ 52 
+ 
+            catch (Exception ex)
+ 53 
+ 
+            {
+ 54 
+ 
+                MessageBox.Show("Error " + ex, "Greska");
+ 55 
+ 
+            }
+ 56 
+ 
+        }
+ 57 
+ 
+ 58 
+ 
+        private void button5_Click(object sender, EventArgs e)
+ 59 
+ 
+        {
+ 60 
+ 
+            Graphics g = pictureBox1.CreateGraphics();
+ 61 
+ 
+            int a = pictureBox1.Width;
+ 62 
+ 
+            Pen c = new Pen(Color.Red, 2);
+ 63 
+ 
+            Pen z = new Pen(Color.Green, 2);
+ 64 
+ 
+            Pen p = new Pen(Color.Blue, 2);
+ 65 
+ 
+ 66 
+ 
+            g.DrawRectangle(z, a / 3, a / 3, a / 3, a / 3);
+ 67 
+ 
+            g.DrawEllipse(p, a / 3, 0, a / 3, a / 3);
+ 68 
+ 
+            g.DrawLine(c, a / 3 + a / 12, 2 * a / 3, a / 3 + a / 12, a);
+ 69 
+ 
+            g.DrawLine(c, a / 3 + a / 4, 2 * a / 3, a / 3 + a / 4, a);
+ 70 
+ 
+            g.DrawLine(c, a / 3, a / 3, 0, a / 2);
+ 71 
+ 
+            g.DrawLine(c, 2 * a / 3, a / 3, a, 0);
+ 72 
+ 
+            g.Dispose();
+ 73 
+ 
+        }
+ 74 
+ 
+ 75 
+ 
+        private void button1_Click(object sender, EventArgs e)
+ 76 
+ 
+        {
+ 77 
+ 
+            button2.Enabled = true;
+ 78 
+ 
+            connection.Open();
+ 79 
+ 
+            OleDbCommand command = new OleDbCommand();
+ 80 
+ 
+            command.CommandType = CommandType.Text;
+ 81 
+ 
+            command.Connection = connection;
+ 82 
+ 
+ 83 
+ 
+            string query = "SELECT MAX(DeteID) FROM Dete";                
+ 84 
+ 
+            command.CommandText = query;
+ 85 
+ 
+            int c = (int)command.ExecuteScalar();
+ 86 
+ 
+            textBox1.Text = (c+1).ToString();
+ 87 
+ 
+ 88 
+ 
+            textBox2.Text = "";
+ 89 
+ 
+            textBox3.Text = "";
+ 90 
+ 
+            dateTimePicker1.Value = DateTime.Now;
+ 91 
+ 
+            connection.Close();
+ 92 
+ 
+            comboBox1.SelectedIndex = -1;
+ 93 
+ 
+        }
+ 94 
+ 
+ 95 
+ 
+        private void button2_Click(object sender, EventArgs e)
+ 96 
+ 
+        {
+ 97 
+ 
+            try
+ 98 
+ 
+            {
+ 99 
+ 
+                int DeteID = Convert.ToInt32(textBox1.Text);
+ 100 
+ 
+                int PolID = 1;
+ 101 
+ 
+                if (radioButton1.Checked == true) { PolID = 1; } else { PolID = 2; }
+ 102 
+ 
+                String Ime = textBox2.Text;
+ 103 
+ 
+                String Prezime = textBox3.Text;
+ 104 
+ 
+                DateTime DatumRodjenja = dateTimePicker1.Value;
+ 105 
+ 
+                String RoditeljID = ((ComboBoxItem)comboBox1.SelectedItem).HiddenValue;
+ 106 
+ 
+ 107 
+ 
+                connection.Open();
+ 108 
+ 
+                OleDbCommand command = new OleDbCommand();
+ 109 
+ 
+                command.CommandType = CommandType.Text;
+ 110 
+ 
+                command.CommandText = "INSERT INTO Dete (DeteID,PolID,Ime,Prezime,DatumRodjenja,RoditeljID) values (?,?,?,?,?,?)";
+ 111 
+ 
+                command.Parameters.AddWithValue("@par1", DeteID);
+ 112 
+ 
+                command.Parameters.AddWithValue("@par2", PolID);
+ 113 
+ 
+                command.Parameters.AddWithValue("@par3", Ime);
+ 114 
+ 
+                command.Parameters.AddWithValue("@par4", Prezime);
+ 115 
+ 
+                command.Parameters.AddWithValue("@par5", DatumRodjenja);
+ 116 
+ 
+                command.Parameters.AddWithValue("@par6", RoditeljID);
+ 117 
+ 
+                command.Connection = connection;
+ 118 
+ 
+                int a = command.ExecuteNonQuery();
+ 119 
+ 
+                if (a > 0) { MessageBox.Show("Uspesno upisan", "Poruka"); }
+ 120 
+ 
+                else { MessageBox.Show("Greska!", "Poruka"); }
+ 121 
+ 
+                connection.Close();
+ 122 
+ 
+            }
+ 123 
+ 
+            catch (Exception ex)
+ 124 
+ 
+            {
+ 125 
+ 
+                MessageBox.Show("Greska: " + ex, "Test");
+ 126 
+ 
+                connection.Close();
+ 127 
+ 
+            }
+ 128 
+ 
+            this.Refresh();
+ 129 
+ 
+        }
+ 130 
+ 
+    }
+ 131 
+ 
+}
+ 132
